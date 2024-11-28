@@ -1,0 +1,74 @@
+name: Node.js CI - OOP Portfolio
+
+on:
+  push:
+    branches: ["main", "development"]
+  pull_request:
+    branches: ["main", "development"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Cache server dependencies
+      - name: Cache server dependencies
+        uses: actions/cache@v3
+        with:
+          path: server/node_modules
+          key: server-node-modules-${{ runner.os }}-${{ matrix.node-version }}-${{ hashFiles('server/package.json') }}
+
+      # Set up Node.js for the server
+      - name: Setup Node.js for server
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      # Install server dependencies
+      - name: Install server dependencies
+        run: |
+          cd server
+          yarn install
+
+      # TypeScript check for server
+      - name: TypeScript Check (Server)
+        run: |
+          cd server
+          yarn tsc --noEmit
+
+      # Cache client dependencies
+      - name: Cache client dependencies
+        uses: actions/cache@v3
+        with:
+          path: client/node_modules
+          key: client-node-modules-${{ runner.os }}-${{ matrix.node-version }}-${{ hashFiles('client/package.json') }}
+
+      # Set up Node.js for client
+      - name: Setup Node.js for client
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      # Install client dependencies
+      - name: Install client dependencies
+        run: |
+          cd client
+          yarn install
+
+      # TypeScript check for client
+      - name: TypeScript Check (Client)
+        run: |
+          cd client
+          yarn tsc --noEmit
+
+      # Build check
+      - name: Build Check
+        run: |
+          cd client
+          yarn build
