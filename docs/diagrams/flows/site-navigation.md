@@ -1,5 +1,20 @@
 # Site Navigation
 ```mermaid
+%%{init: {
+  'theme': 'dark',
+  'themeVariables': { 
+    'fontSize': '24px',
+    'fontFamily': 'monospace'
+  },
+  'flowchart': {
+    'diagramPadding': 100,
+    'nodeSpacing': 100,
+    'rankSpacing': 100,
+    'curve': 'basis'
+  },
+  'height': 1000,
+  'width': 2000
+}}%%
 flowchart TD
     subgraph Public["Public Routes"]
         A[Landing Page] --> B[Projects Gallery]
@@ -44,3 +59,4 @@ flowchart TD
     style A fill:#f9f,stroke:#333,stroke-width:2px
     style L fill:#bbf,stroke:#333,stroke-width:2px
     style M fill:#dfd,stroke:#333,stroke-width:2px
+```
