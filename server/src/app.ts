@@ -4,6 +4,10 @@ import helmet from 'helmet';
 import { projectRoutes } from './routes/projectRoutes';
 import { profileRoutes } from './routes/profileRoutes';
 import { errorHandler } from './middleware/errorMiddleware';
+import { adminRoutes } from './routes/AdminRoutes';
+import { analyticsRoutes } from './routes/AnalyticsRoutes';
+import { messageRoutes } from './routes/MessageRoutes';
+import { technologyRoutes } from './routes/TechnologyRoutes';
 
 export class App {
     private app: express.Application;
@@ -26,6 +30,10 @@ export class App {
     private configureRoutes(): void {
         this.app.use('/api/projects', projectRoutes);
         this.app.use('/api/profile', profileRoutes);
+        this.app.use('/api/admin', adminRoutes);
+        this.app.use('/api/analytics', analyticsRoutes);
+        this.app.use('/api/messages', messageRoutes);
+        this.app.use('/api/technologies', technologyRoutes);
     }
 
     private configureErrorHandling(): void {
