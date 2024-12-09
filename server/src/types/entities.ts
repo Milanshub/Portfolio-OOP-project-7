@@ -18,3 +18,18 @@ export interface IProject {
 export interface ICreateProject extends Omit<IProject, 'id'> {};
 // Define an interface for updating a project
 export interface IUpdateProject extends Partial<ICreateProject> {};
+
+// Profile interfaces
+export interface IProfile {
+    id: string;
+    fullName: string;
+    title: string;
+    bio: string;
+    avatar: string;
+    resume: string;
+    location: string;
+    email: string;
+};
+
+export interface ICreateProfile extends Omit<IProfile, 'id'> {};
+export interface IUpdateProfile extends Partial<ICreateProfile> {};

@@ -1,96 +1,145 @@
-// Import the ProjectRepository class from the repositories directory
-// Import the IProject, ICreateProject, and IUpdateProject interfaces from the types directory
-import { ProjectRepository } from '../respositories/ProjectRepository';
+import { Express } from 'express';
 import { IProject, ICreateProject, IUpdateProject } from '../types/entities';
+import { Project } from '../models/Project';
+import { StorageService } from './StorageService';
 
-// Define a class for the ProjectService
 export class ProjectService {
-  // Define a private instance of the ProjectRepository
-  private repository: ProjectRepository;
+    private projectModel: Project;
+    private storageService: StorageService;
 
-  // Define a constructor to initialize the repository
-  constructor() {
-    this.repository = ProjectRepository.getInstance();
-  }
+    constructor() {
+        this.projectModel = new Project();
+        this.storageService = new StorageService();
+    }
 
-  // Define a method to get all projects
-  async getAllProjects(): Promise<IProject[]> {
-    try {
-      return await this.repository.findAll();
-    } catch (error: any) {
-      throw new Error(`Error fetching projects: ${error.message}`);
+    async getAllProjects(): Promise<IProject[]> {
+        try {
+            return await this.projectModel.findAll();
+        } catch (error: any) {
+            throw new Error(`Failed to get projects: ${error.message}`);
+        }
     }
-  }
 
-  // Define a method to get a project by id
-  async getProjectById(id: string): Promise<IProject | null> {
-    try {
-      const project = await this.repository.findById(id);
-      if (!project) {
-        throw new Error('Project not found');
-      }
-      return project;
-    } catch (error: any) {
-      throw new Error(`Error fetching project: ${error.message}`);
+    async getFeaturedProjects(): Promise<IProject[]> {
+        try {
+            return await this.projectModel.findFeatured();
+        } catch (error: any) {
+            throw new Error(`Failed to get featured projects: ${error.message}`);
+        }
     }
-  }
 
-  // Define a method to create a project
-  async createProject(projectData: ICreateProject): Promise<IProject> {
-    try {
-      // Business logic validation
-      this.validateProject(projectData);
-      return await this.repository.create(projectData);
-    } catch (error: any) {
-      throw new Error(`Error creating project: ${error.message}`);
+    async getProjectById(id: string): Promise<IProject> {
+        try {
+            const project = await this.projectModel.findById(id);
+            if (!project) {
+                throw new Error('Project not found');
+            }
+            return project;
+        } catch (error: any) {
+            throw new Error(`Failed to get project: ${error.message}`);
+        }
     }
-  }
 
-  // Define a method to update a project
-  async updateProject(id: string, projectData: IUpdateProject): Promise<IProject | null> {
-    try {
-      const existingProject = await this.repository.findById(id);
-      if (!existingProject) {
-        throw new Error('Project not found');
-      }
-      return await this.repository.update(id, projectData);
-    } catch (error: any) {
-      throw new Error(`Error updating project: ${error.message}`);
+    async createProject(projectData: ICreateProject): Promise<IProject> {
+        try {
+            return await this.projectModel.create(projectData);
+        } catch (error: any) {
+            throw new Error(`Failed to create project: ${error.message}`);
+        }
     }
-  }
 
-  // Define a method to delete a project
-  async deleteProject(id: string): Promise<boolean> {
-    try {
-      const existingProject = await this.repository.findById(id);
-      if (!existingProject) {
-        throw new Error('Project not found');
-      }
-      return await this.repository.delete(id);
-    } catch (error: any) {
-      throw new Error(`Error deleting project: ${error.message}`);
+    async updateProject(id: string, projectData: IUpdateProject): Promise<IProject> {
+        try {
+            const updatedProject = await this.projectModel.update(id, projectData);
+            if (!updatedProject) {
+                throw new Error('Project not found');
+            }
+            return updatedProject;
+        } catch (error: any) {
+            throw new Error(`Failed to update project: ${error.message}`);
+        }
     }
-  }
 
-  // Define a method to get featured projects
-  async getFeaturedProjects(): Promise<IProject[]> {
-    try {
-      return await this.repository.getFeaturedProjects();
-    } catch (error: any) {
-      throw new Error(`Error fetching featured projects: ${error.message}`);
-    }
-  }
+    async deleteProject(id: string): Promise<boolean> {
+        try {
+            const project = await this.projectModel.findById(id);
+            if (!project) {
+                throw new Error('Project not found');
+            }
 
-  // Define a private method to validate a project
-  private validateProject(project: ICreateProject): void {
-    if (!project.title) {
-      throw new Error('Project title is required');
+            // Delete associated files
+            if (project.thumbnail) {
+                await this.storageService.deleteFile(project.thumbnail);
+            }
+            for (const image of project.images) {
+                await this.storageService.deleteFile(image);
+            }
+
+            return await this.projectModel.delete(id);
+        } catch (error: any) {
+            throw new Error(`Failed to delete project: ${error.message}`);
+        }
     }
-    if (!project.description) {
-      throw new Error('Project description is required');
+
+    async updateThumbnail(id: string, file: Express.Multer.File): Promise<IProject> {
+        try {
+            const project = await this.projectModel.findById(id);
+            if (!project) {
+                throw new Error('Project not found');
+            }
+
+            const thumbnailUrl = await this.storageService.uploadFile(
+                file,
+                'projects',
+                ['image/jpeg', 'image/png']
+            );
+
+            const updatedProject = await this.projectModel.updateThumbnail(id, thumbnailUrl);
+            if (!updatedProject) {
+                throw new Error('Failed to update thumbnail');
+            }
+
+            // Delete old thumbnail if exists
+            if (project.thumbnail) {
+                await this.storageService.deleteFile(project.thumbnail);
+            }
+
+            return updatedProject;
+        } catch (error: any) {
+            throw new Error(`Failed to update thumbnail: ${error.message}`);
+        }
     }
-    if (!project.shortDescription) {
-      throw new Error('Project short description is required');
+
+    async updateImages(id: string, files: Express.Multer.File[]): Promise<IProject> {
+        try {
+            const project = await this.projectModel.findById(id);
+            if (!project) {
+                throw new Error('Project not found');
+            }
+
+            const imageUrls = await Promise.all(
+                files.map(file => 
+                    this.storageService.uploadFile(
+                        file,
+                        'projects',
+                        ['image/jpeg', 'image/png']
+                    )
+                )
+            );
+
+            const updatedProject = await this.projectModel.updateImages(id, imageUrls);
+            if (!updatedProject) {
+                throw new Error('Failed to update images');
+            }
+
+            // Delete old images if they exist
+            for (const image of project.images) {
+                await this.storageService.deleteFile(image);
+            }
+
+            return updatedProject;
+        } catch (error: any) {
+            throw new Error(`Failed to update images: ${error.message}`);
+        }
     }
-  }
 }
