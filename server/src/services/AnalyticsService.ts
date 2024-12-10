@@ -2,6 +2,9 @@ import { IAnalytics, ICreateAnalytics, IUpdateAnalytics } from '../types/entitie
 import { Analytics } from '../models/Analytics';
 
 export class AnalyticsService {
+    incrementPageViews() {
+        throw new Error('Method not implemented.');
+    }
     private analyticsModel: Analytics;
 
     constructor() {

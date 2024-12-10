@@ -35,6 +35,7 @@ export interface IUpdateProfile extends Partial<ICreateProfile> {};
 // Admin interfaces
 export interface IAdmin {
     id: string;
+    name?: string;
     email: string;
     password: string;
     lastLogin: Date;

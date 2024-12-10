@@ -60,6 +60,18 @@ export class AdminService {
         }
     }
 
+    async getAdminById(id: string): Promise<IAdmin | null> {
+        try {
+            const admin = await this.adminModel.findById(id);
+            if (!admin) {
+                throw new Error('Admin not found');
+            }
+            return admin;
+        } catch (error: any) {
+            throw new Error(`Failed to get admin: ${error.message}`);
+        }
+    }
+
     async updateAdmin(id: string, adminData: IUpdateAdmin): Promise<IAdmin> {
         try {
             if (adminData.email && !this.isValidEmail(adminData.email)) {
