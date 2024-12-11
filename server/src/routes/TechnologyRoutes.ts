@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { TechnologyController } from '../controllers/TechnologyController';
-import { authMiddleware } from '../middleware/authMiddleware';
+import { authenticate } from '../middleware/authMiddleware';
 
-const router = Router();
+export const router = Router();
 const technologyController = new TechnologyController();
 
 // Public routes
@@ -11,9 +11,8 @@ router.get('/:id', technologyController.getTechnologyById.bind(technologyControl
 router.get('/category/:category', technologyController.getTechnologiesByCategory.bind(technologyController));
 
 // Protected routes
-router.post('/', authMiddleware, technologyController.createTechnology.bind(technologyController));
-router.put('/:id', authMiddleware, technologyController.updateTechnology.bind(technologyController));
-router.delete('/:id', authMiddleware, technologyController.deleteTechnology.bind(technologyController));
-router.put('/:id/proficiency', authMiddleware, technologyController.updateProficiencyLevel.bind(technologyController));
+router.post('/', authenticate, technologyController.createTechnology.bind(technologyController));
+router.put('/:id', authenticate, technologyController.updateTechnology.bind(technologyController));
+router.delete('/:id', authenticate, technologyController.deleteTechnology.bind(technologyController));
+router.put('/:id/proficiency', authenticate, technologyController.updateProficiencyLevel.bind(technologyController));
 
-export const technologyRoutes = router;

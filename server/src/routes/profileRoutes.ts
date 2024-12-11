@@ -1,16 +1,32 @@
 import { Router } from 'express';
 import multer from 'multer';
 import { ProfileController } from '../controllers/ProfileController';
-import { authMiddleware } from '../middleware/authMiddleware';
+import { authenticate, requireAdmin } from '../middleware/authMiddleware';
+import { Logger } from '../utils/logger';
+import { fileHelpers } from '../utils/helpers/fileHelpers';
 
-const router = Router();
+export const router = Router();
 const profileController = new ProfileController();
+const logger = Logger.getInstance();
 
-// Configure multer for memory storage
+// Configure multer for memory storage with file validation
 const upload = multer({
     storage: multer.memoryStorage(),
     limits: {
         fileSize: 5 * 1024 * 1024, // 5MB limit
+    },
+    fileFilter: (req, file, cb) => {
+        if (file.fieldname === 'avatar' && !fileHelpers.isValidImageType(file.mimetype)) {
+            logger.warn('Invalid avatar file type');
+            cb(new Error('Only JPEG and PNG files are allowed for avatars'));
+            return;
+        }
+        if (file.fieldname === 'resume' && !fileHelpers.isValidResumeType(file.mimetype)) {
+            logger.warn('Invalid resume file type');
+            cb(new Error('Only PDF files are allowed for resumes'));
+            return;
+        }
+        cb(null, true);
     }
 });
 
@@ -18,18 +34,18 @@ const upload = multer({
 router.get('/', profileController.getProfile.bind(profileController));
 
 // Protected routes
-router.put('/', authMiddleware, profileController.updateProfile.bind(profileController));
+router.put('/', authenticate, requireAdmin, profileController.updateProfile.bind(profileController));
 router.post(
-    '/avatar', 
-    authMiddleware, 
+    '/avatar',
+    authenticate,
+    requireAdmin,
     upload.single('avatar'),
     profileController.uploadAvatar.bind(profileController)
 );
 router.post(
-    '/resume', 
-    authMiddleware, 
+    '/resume',
+    authenticate,
+    requireAdmin,
     upload.single('resume'),
     profileController.uploadResume.bind(profileController)
 );
-
-export const profileRoutes = router;

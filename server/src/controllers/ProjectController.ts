@@ -137,6 +137,100 @@ export class ProjectController {
             res.status(500).json({ error: error.message });
         }
     }
+    async getFeaturedProjects(req: Request, res: Response): Promise<void> {
+        try {
+            const cacheKey = 'featured-projects';
+            const cached = this.cache.get(cacheKey);
+            
+            if (cached) {
+                this.logger.debug('Serving featured projects from cache');
+                res.status(200).json(cached);
+                return;
+            }
 
+            const projects = await this.projectService.getFeaturedProjects();
+            this.cache.set(cacheKey, projects);
+            this.logger.info('Featured projects fetched successfully');
+            res.status(200).json(projects);
+        } catch (error: any) {
+            this.logger.error('Failed to get featured projects:', error);
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+    async deleteProject(req: Request, res: Response): Promise<void> {
+        try {
+            const { id } = req.params;
+            await this.projectService.deleteProject(id);
+            this.logger.info(`Project ${id} deleted successfully`);
+            this.cache.clear(); // Clear cache when data changes
+            res.status(200).json({ message: 'Project deleted successfully' });
+        } catch (error: any) {
+            this.logger.error(`Failed to delete project ${req.params.id}:`, error);
+            if (error.message === 'Project not found') {
+                res.status(404).json({ error: error.message });
+            } else {
+                res.status(500).json({ error: error.message });
+            }
+        }
+    }
+
+    async updateImages(req: Request, res: Response): Promise<void> {
+        try {
+            const { id } = req.params;
+            if (!req.files || !Array.isArray(req.files)) {
+                throw new Error('No files uploaded');
+            }
+
+            for (const file of req.files) {
+                if (!fileHelpers.isValidImageType(file.mimetype)) {
+                    this.logger.warn(`Invalid file type for project ${id} images`);
+                    res.status(400).json({ error: 'Invalid file type' });
+                    return;
+                }
+            }
+
+            const project = await this.projectService.updateImages(id, req.files);
+            this.logger.info(`Images updated for project ${id}`);
+            this.cache.clear(); // Clear cache when data changes
+            res.status(200).json(project);
+        } catch (error: any) {
+            this.logger.error(`Failed to update images for project ${req.params.id}:`, error);
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+    async uploadImages(req: Request, res: Response): Promise<void> {
+        try {
+            const { id } = req.params;
+            if (!req.files || !Array.isArray(req.files)) {
+                throw new Error('No files uploaded');
+            }
+
+            // Validate file types
+            for (const file of req.files) {
+                if (!fileHelpers.isValidImageType(file.mimetype)) {
+                    this.logger.warn(`Invalid file type for project ${id} images`);
+                    res.status(400).json({ error: 'Invalid file type. Only JPEG and PNG are allowed' });
+                    return;
+                }
+            }
+
+            // Check file count
+            if (req.files.length > 5) {
+                this.logger.warn(`Too many files uploaded for project ${id}`);
+                res.status(400).json({ error: 'Maximum 5 images allowed' });
+                return;
+            }
+
+            const project = await this.projectService.updateImages(id, req.files);
+            this.logger.info(`Images uploaded for project ${id}`);
+            this.cache.clear(); // Clear cache when data changes
+            res.status(200).json(project);
+        } catch (error: any) {
+            this.logger.error(`Failed to upload images for project ${req.params.id}:`, error);
+            res.status(500).json({ error: error.message });
+        }
+    }
     // ... similar updates for other methods
 }

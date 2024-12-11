@@ -1,15 +1,14 @@
 import { supabase } from '../config/supabase';
 import { IProject, ICreateProject, IUpdateProject } from '../types/entities';
 import { IRepository } from '../models/interfaces/IRepository';
+import { Logger } from '../utils/logger';
+import { AppError } from '../middleware/errorMiddleware';
 
-// Define a class for the ProjectRepository
 export class ProjectRepository implements IRepository<IProject, ICreateProject, IUpdateProject> {
-  // Define a private static instance of the class
   private static instance: ProjectRepository;
-  // Define a private readonly table name for the projects
   private readonly TABLE_NAME = 'projects';
+  private logger = Logger.getInstance();
 
-  // Define a private constructor to prevent direct instantiation
   private constructor() {}
 
   public static getInstance(): ProjectRepository {
@@ -19,87 +18,122 @@ export class ProjectRepository implements IRepository<IProject, ICreateProject, 
     return ProjectRepository.instance;
   }
 
-  // Define a method to find all projects
   async findAll(): Promise<IProject[]> {
-    const { data, error } = await supabase
-      .from(this.TABLE_NAME)
-      .select('*')
-      .order('order', { ascending: true });
+    try {
+      this.logger.debug('Fetching all projects');
+      const { data, error } = await supabase
+        .from(this.TABLE_NAME)
+        .select('*')
+        .order('order', { ascending: true });
 
-    if (error) throw new Error(error.message);
-    return data || [];
+      if (error) throw new AppError(error.message, 500);
+      return data || [];
+    } catch (error: any) {
+      this.logger.error('Failed to fetch projects:', error);
+      throw new AppError(`Database error: ${error.message}`, 500);
+    }
   }
 
-  // Define a method to find a project by its ID
   async findById(id: string): Promise<IProject | null> {
-    const { data, error } = await supabase
-      .from(this.TABLE_NAME)
-      .select('*')
-      .eq('id', id)
-      .single();
+    try {
+      this.logger.debug(`Fetching project with id: ${id}`);
+      const { data, error } = await supabase
+        .from(this.TABLE_NAME)
+        .select('*')
+        .eq('id', id)
+        .single();
 
-    if (error) throw new Error(error.message);
-    return data;
+      if (error) throw new AppError(error.message, 500);
+      return data;
+    } catch (error: any) {
+      this.logger.error(`Failed to fetch project ${id}:`, error);
+      throw new AppError(`Database error: ${error.message}`, 500);
+    }
   }
 
-  // Define a method to create a new project
   async create(project: ICreateProject): Promise<IProject> {
-    const { data, error } = await supabase
-      .from(this.TABLE_NAME)
-      .insert(project)
-      .select()
-      .single();
+    try {
+      this.logger.debug('Creating new project:', project);
+      const { data, error } = await supabase
+        .from(this.TABLE_NAME)
+        .insert(project)
+        .select()
+        .single();
 
-    if (error) throw new Error(error.message);
-    return data;
+      if (error) throw new AppError(error.message, 500);
+      return data;
+    } catch (error: any) {
+      this.logger.error('Failed to create project:', error);
+      throw new AppError(`Database error: ${error.message}`, 500);
+    }
   }
 
-  // Define a method to update an existing project
   async update(id: string, project: IUpdateProject): Promise<IProject | null> {
-    const { data, error } = await supabase
-      .from(this.TABLE_NAME)
-      .update(project)
-      .eq('id', id)
-      .select()
-      .single();
+    try {
+      this.logger.debug(`Updating project ${id}:`, project);
+      const { data, error } = await supabase
+        .from(this.TABLE_NAME)
+        .update(project)
+        .eq('id', id)
+        .select()
+        .single();
 
-    if (error) throw new Error(error.message);
-    return data;
+      if (error) throw new AppError(error.message, 500);
+      return data;
+    } catch (error: any) {
+      this.logger.error(`Failed to update project ${id}:`, error);
+      throw new AppError(`Database error: ${error.message}`, 500);
+    }
   }
 
-  // Define a method to delete a project
   async delete(id: string): Promise<boolean> {
-    const { error } = await supabase
-      .from(this.TABLE_NAME)
-      .delete()
-      .eq('id', id);
+    try {
+      this.logger.debug(`Deleting project ${id}`);
+      const { error } = await supabase
+        .from(this.TABLE_NAME)
+        .delete()
+        .eq('id', id);
 
-    if (error) throw new Error(error.message);
-    return true;
+      if (error) throw new AppError(error.message, 500);
+      return true;
+    } catch (error: any) {
+      this.logger.error(`Failed to delete project ${id}:`, error);
+      throw new AppError(`Database error: ${error.message}`, 500);
+    }
   }
 
-  // Define a method to get featured projects
   async getFeaturedProjects(): Promise<IProject[]> {
-    const { data, error } = await supabase
-      .from(this.TABLE_NAME)
-      .select('*')
-      .eq('featured', true)
-      .order('order', { ascending: true });
+    try {
+      this.logger.debug('Fetching featured projects');
+      const { data, error } = await supabase
+        .from(this.TABLE_NAME)
+        .select('*')
+        .eq('featured', true)
+        .order('order', { ascending: true });
 
-    if (error) throw new Error(error.message);
-    return data || [];
+      if (error) throw new AppError(error.message, 500);
+      return data || [];
+    } catch (error: any) {
+      this.logger.error('Failed to fetch featured projects:', error);
+      throw new AppError(`Database error: ${error.message}`, 500);
+    }
   }
 
-  // Define a method to update the order of a project
-    async updateOrder(id: string, newOrder: number): Promise<IProject | null> {
-    const { data, error } = await supabase
-      .from(this.TABLE_NAME)
-      .update({ order: newOrder })
-      .eq('id', id)
-      .select()
-      .single();
+  async updateOrder(id: string, newOrder: number): Promise<IProject | null> {
+    try {
+      this.logger.debug(`Updating order for project ${id} to ${newOrder}`);
+      const { data, error } = await supabase
+        .from(this.TABLE_NAME)
+        .update({ order: newOrder })
+        .eq('id', id)
+        .select()
+        .single();
 
-    if (error) throw new Error(error.message);
-    return data;
+      if (error) throw new AppError(error.message, 500);
+      return data;
+    } catch (error: any) {
+      this.logger.error(`Failed to update order for project ${id}:`, error);
+      throw new AppError(`Database error: ${error.message}`, 500);
+    }
   }
-}; 
+}

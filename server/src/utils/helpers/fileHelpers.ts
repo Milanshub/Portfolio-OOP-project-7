@@ -10,6 +10,11 @@ export const fileHelpers = {
         return validTypes.includes(mimetype);
     },
 
+    isValidResumeType: (mimetype: string): boolean => {
+        const validTypes = ['application/pdf'];
+        return validTypes.includes(mimetype);
+    },
+
     generateFileName: (originalName: string): string => {
         const timestamp = Date.now();
         const extension = extname(originalName);

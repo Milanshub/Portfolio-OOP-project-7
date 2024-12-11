@@ -1,8 +1,10 @@
 import { ITechnology, ICreateTechnology, IUpdateTechnology, TechnologyCategory } from '../types/entities';
 import { Technology } from '../models/Technology';
+import { Logger } from '../utils/logger';
 
 export class TechnologyService {
     private technologyModel: Technology;
+    private logger = Logger.getInstance();
 
     constructor() {
         this.technologyModel = new Technology();
@@ -10,8 +12,11 @@ export class TechnologyService {
 
     async getAllTechnologies(): Promise<ITechnology[]> {
         try {
-            return await this.technologyModel.findAll();
+            const technologies = await this.technologyModel.findAll();
+            this.logger.info('All technologies retrieved successfully');
+            return technologies;
         } catch (error: any) {
+            this.logger.error('Failed to get technologies:', error);
             throw new Error(`Failed to get technologies: ${error.message}`);
         }
     }
@@ -20,10 +25,13 @@ export class TechnologyService {
         try {
             const technology = await this.technologyModel.findById(id);
             if (!technology) {
+                this.logger.warn(`Technology not found with ID: ${id}`);
                 throw new Error('Technology not found');
             }
+            this.logger.debug(`Technology retrieved: ${id}`);
             return technology;
         } catch (error: any) {
+            this.logger.error(`Failed to get technology: ${id}`, error);
             throw new Error(`Failed to get technology: ${error.message}`);
         }
     }
@@ -32,10 +40,14 @@ export class TechnologyService {
         try {
             // Validate category
             if (!Object.values(TechnologyCategory).includes(category as TechnologyCategory)) {
+                this.logger.warn(`Invalid category attempted: ${category}`);
                 throw new Error('Invalid category');
             }
-            return await this.technologyModel.findByCategory(category);
+            const technologies = await this.technologyModel.findByCategory(category);
+            this.logger.info(`Technologies retrieved for category: ${category}`);
+            return technologies;
         } catch (error: any) {
+            this.logger.error(`Failed to get technologies for category: ${category}`, error);
             throw new Error(`Failed to get technologies by category: ${error.message}`);
         }
     }
@@ -44,16 +56,21 @@ export class TechnologyService {
         try {
             // Validate category
             if (!Object.values(TechnologyCategory).includes(technologyData.category)) {
+                this.logger.warn(`Invalid category attempted: ${technologyData.category}`);
                 throw new Error('Invalid category');
             }
 
             // Validate proficiency level
             if (technologyData.proficiencyLevel < 1 || technologyData.proficiencyLevel > 10) {
+                this.logger.warn(`Invalid proficiency level attempted: ${technologyData.proficiencyLevel}`);
                 throw new Error('Proficiency level must be between 1 and 10');
             }
 
-            return await this.technologyModel.create(technologyData);
+            const technology = await this.technologyModel.create(technologyData);
+            this.logger.info(`New technology created: ${technology.id}`);
+            return technology;
         } catch (error: any) {
+            this.logger.error('Failed to create technology:', error);
             throw new Error(`Failed to create technology: ${error.message}`);
         }
     }
@@ -62,21 +79,26 @@ export class TechnologyService {
         try {
             // Validate category if provided
             if (technologyData.category && !Object.values(TechnologyCategory).includes(technologyData.category)) {
+                this.logger.warn(`Invalid category attempted for update: ${technologyData.category}`);
                 throw new Error('Invalid category');
             }
 
             // Validate proficiency level if provided
             if (technologyData.proficiencyLevel && 
                 (technologyData.proficiencyLevel < 1 || technologyData.proficiencyLevel > 10)) {
+                this.logger.warn(`Invalid proficiency level attempted for update: ${technologyData.proficiencyLevel}`);
                 throw new Error('Proficiency level must be between 1 and 10');
             }
 
             const technology = await this.technologyModel.update(id, technologyData);
             if (!technology) {
+                this.logger.warn(`Technology not found for update: ${id}`);
                 throw new Error('Technology not found');
             }
+            this.logger.info(`Technology updated successfully: ${id}`);
             return technology;
         } catch (error: any) {
+            this.logger.error(`Failed to update technology: ${id}`, error);
             throw new Error(`Failed to update technology: ${error.message}`);
         }
     }
@@ -85,10 +107,16 @@ export class TechnologyService {
         try {
             const technology = await this.technologyModel.findById(id);
             if (!technology) {
+                this.logger.warn(`Technology not found for deletion: ${id}`);
                 throw new Error('Technology not found');
             }
-            return await this.technologyModel.delete(id);
+            const result = await this.technologyModel.delete(id);
+            if (result) {
+                this.logger.info(`Technology deleted successfully: ${id}`);
+            }
+            return result;
         } catch (error: any) {
+            this.logger.error(`Failed to delete technology: ${id}`, error);
             throw new Error(`Failed to delete technology: ${error.message}`);
         }
     }
@@ -96,15 +124,19 @@ export class TechnologyService {
     async updateProficiencyLevel(id: string, level: number): Promise<ITechnology> {
         try {
             if (level < 1 || level > 10) {
+                this.logger.warn(`Invalid proficiency level attempted: ${level}`);
                 throw new Error('Proficiency level must be between 1 and 10');
             }
 
             const technology = await this.technologyModel.updateProficiencyLevel(id, level);
             if (!technology) {
+                this.logger.warn(`Technology not found for proficiency update: ${id}`);
                 throw new Error('Technology not found');
             }
+            this.logger.info(`Proficiency level updated for technology: ${id}`);
             return technology;
         } catch (error: any) {
+            this.logger.error(`Failed to update proficiency level: ${id}`, error);
             throw new Error(`Failed to update proficiency level: ${error.message}`);
         }
     }

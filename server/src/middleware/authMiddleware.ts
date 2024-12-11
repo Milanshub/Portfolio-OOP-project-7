@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { Logger } from '../utils/logger';
 import { Cache } from '../utils/cache';
 import { AppError } from './errorMiddleware';
+import { supabase } from '@/config/supabase';
 
 interface JwtPayload {
     id: string;
@@ -69,9 +70,17 @@ export class AuthMiddleware {
                 this.logger.warn('Admin check failed: No user in request');
                 throw new AppError('Authentication required', 401);
             }
-
-            // Add your admin check logic here
-            // For example: const isAdmin = await adminService.isAdmin(req.user.id);
+    
+            const { data: admin, error } = await supabase
+                .from('admins')
+                .select('*')
+                .eq('id', req.user.id)
+                .single();
+    
+            if (error || !admin) {
+                this.logger.warn(`Admin check failed: User ${req.user.id} is not an admin`);
+                throw new AppError('Admin access required', 403);
+            }
             
             this.logger.debug('Admin check successful', { userId: req.user.id });
             next();

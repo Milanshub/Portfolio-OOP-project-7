@@ -1,9 +1,12 @@
 import jwt from 'jsonwebtoken';
 import { IAdmin, ICreateAdmin, IUpdateAdmin } from '../types/entities';
 import { Admin } from '../models/Admin';
+import { Logger } from '../utils/logger';
+import { emailValidator } from '../utils/validators/emailValidator';
 
 export class AdminService {
     private adminModel: Admin;
+    private logger = Logger.getInstance();
 
     constructor() {
         this.adminModel = new Admin();
@@ -13,6 +16,7 @@ export class AdminService {
         try {
             const admin = await this.adminModel.findByEmail(email);
             if (!admin) {
+                this.logger.warn(`Failed login attempt for email: ${email}`);
                 throw new Error('Invalid credentials');
             }
 
@@ -22,11 +26,13 @@ export class AdminService {
             );
 
             if (!isValidPassword) {
+                this.logger.warn(`Invalid password attempt for admin: ${email}`);
                 throw new Error('Invalid credentials');
             }
 
             // Update last login
             await this.adminModel.updateLastLogin(admin.id);
+            this.logger.info(`Admin logged in successfully: ${email}`);
 
             // Generate JWT token
             const token = jwt.sign(
@@ -37,6 +43,7 @@ export class AdminService {
 
             return { admin, token };
         } catch (error: any) {
+            this.logger.error(`Login failed: ${error.message}`);
             throw new Error(`Login failed: ${error.message}`);
         }
     }
@@ -44,18 +51,22 @@ export class AdminService {
     async createAdmin(adminData: ICreateAdmin): Promise<IAdmin> {
         try {
             // Validate email format
-            if (!this.isValidEmail(adminData.email)) {
+            if (!emailValidator.isValidEmail(adminData.email)) {
                 throw new Error('Invalid email format');
             }
 
             // Check if email already exists
             const existingAdmin = await this.adminModel.findByEmail(adminData.email);
             if (existingAdmin) {
+                this.logger.warn(`Attempt to create admin with existing email: ${adminData.email}`);
                 throw new Error('Email already registered');
             }
 
-            return await this.adminModel.create(adminData);
+            const admin = await this.adminModel.create(adminData);
+            this.logger.info(`New admin created: ${admin.email}`);
+            return admin;
         } catch (error: any) {
+            this.logger.error(`Failed to create admin: ${error.message}`);
             throw new Error(`Failed to create admin: ${error.message}`);
         }
     }
@@ -64,27 +75,32 @@ export class AdminService {
         try {
             const admin = await this.adminModel.findById(id);
             if (!admin) {
+                this.logger.warn(`Admin not found with ID: ${id}`);
                 throw new Error('Admin not found');
             }
             return admin;
         } catch (error: any) {
+            this.logger.error(`Failed to get admin: ${error.message}`);
             throw new Error(`Failed to get admin: ${error.message}`);
         }
     }
 
     async updateAdmin(id: string, adminData: IUpdateAdmin): Promise<IAdmin> {
         try {
-            if (adminData.email && !this.isValidEmail(adminData.email)) {
+            if (adminData.email && !emailValidator.isValidEmail(adminData.email)) {
                 throw new Error('Invalid email format');
             }
 
             const updatedAdmin = await this.adminModel.update(id, adminData);
             if (!updatedAdmin) {
+                this.logger.warn(`Admin not found for update with ID: ${id}`);
                 throw new Error('Admin not found');
             }
 
+            this.logger.info(`Admin updated successfully: ${id}`);
             return updatedAdmin;
         } catch (error: any) {
+            this.logger.error(`Failed to update admin: ${error.message}`);
             throw new Error(`Failed to update admin: ${error.message}`);
         }
     }
@@ -93,17 +109,18 @@ export class AdminService {
         try {
             const admin = await this.adminModel.findById(id);
             if (!admin) {
+                this.logger.warn(`Admin not found for deletion with ID: ${id}`);
                 throw new Error('Admin not found');
             }
 
-            return await this.adminModel.delete(id);
+            const result = await this.adminModel.delete(id);
+            if (result) {
+                this.logger.info(`Admin deleted successfully: ${id}`);
+            }
+            return result;
         } catch (error: any) {
+            this.logger.error(`Failed to delete admin: ${error.message}`);
             throw new Error(`Failed to delete admin: ${error.message}`);
         }
-    }
-
-    private isValidEmail(email: string): boolean {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
     }
 }

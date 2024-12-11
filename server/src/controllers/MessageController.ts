@@ -69,5 +69,60 @@ export class MessageController {
         }
     }
 
+    async getUnreadMessages(req: Request, res: Response): Promise<void> {
+        try {
+            const cacheKey = 'unread-messages';
+            const cached = this.cache.get(cacheKey);
+            
+            if (cached) {
+                this.logger.debug('Serving unread messages from cache');
+                res.status(200).json(cached);
+                return;
+            }
+
+            const messages = await this.messageService.getUnreadMessages();
+            this.cache.set(cacheKey, messages);
+            this.logger.info('Unread messages fetched successfully');
+            res.status(200).json(messages);
+        } catch (error: any) {
+            this.logger.error('Failed to get unread messages:', error);
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+    async getUnreadCount(req: Request, res: Response): Promise<void> {
+        try {
+            const cacheKey = 'unread-count';
+            const cached = this.cache.get(cacheKey);
+            
+            if (cached) {
+                this.logger.debug('Serving unread count from cache');
+                res.status(200).json(cached);
+                return;
+            }
+
+            const count = await this.messageService.getUnreadCount();
+            this.cache.set(cacheKey, { count });
+            this.logger.info('Unread count fetched successfully');
+            res.status(200).json({ count });
+        } catch (error: any) {
+            this.logger.error('Failed to get unread count:', error);
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+    async deleteMessage(req: Request, res: Response): Promise<void> {
+        try {
+            const { id } = req.params;
+            await this.messageService.deleteMessage(id);
+            this.logger.info(`Message ${id} deleted successfully`);
+            this.cache.clear(); // Clear cache when data changes
+            res.status(200).json({ message: 'Message deleted successfully' });
+        } catch (error: any) {
+            this.logger.error(`Failed to delete message ${req.params.id}:`, error);
+            res.status(400).json({ error: error.message });
+        }
+    }
+
     // ... similar updates for other methods
 }

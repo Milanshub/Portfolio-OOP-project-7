@@ -56,5 +56,39 @@ export class AnalyticsController {
         }
     }
 
+
+    async generateAnalyticsReport(req: Request, res: Response): Promise<void> {
+        try {
+            const report = await this.analyticsService.generateAnalyticsReport();
+            res.status(200).json(report);
+        } catch (error: any) {
+            this.logger.error('Failed to generate analytics report:', error);
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+    async createAnalytics(req: Request, res: Response): Promise<void> {
+        try {
+            const analytics = await this.analyticsService.createAnalytics(req.body);
+            this.cache.clear(); // Clear cache when data changes
+            res.status(201).json(analytics);
+        } catch (error: any) {
+            this.logger.error('Failed to create analytics:', error);
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+    async updateAnalytics(req: Request, res: Response): Promise<void> {
+        try {
+            const analytics = await this.analyticsService.updateAnalytics(req.params.id, req.body);
+            this.cache.clear(); // Clear cache when data changes
+            res.status(200).json(analytics);
+        } catch (error: any) {
+            this.logger.error('Failed to update analytics:', error);
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+// ... existing code ...
     // ... similar updates for other methods
 }
