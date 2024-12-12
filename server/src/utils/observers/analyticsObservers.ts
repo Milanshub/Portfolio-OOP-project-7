@@ -17,7 +17,7 @@ export class AnalyticsObserver {
 
     async trackPageView(page: string): Promise<void> {
         try {
-            await this.analyticsService.incrementPageViews();
+            await this.analyticsService.recordPageView();  // Changed from incrementPageViews()
         } catch (error) {
             console.error(`Failed to track page view for ${page}:`, error);
         }
