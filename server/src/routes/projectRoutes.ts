@@ -2,6 +2,8 @@ import { Router } from 'express';
 import multer from 'multer';
 import { ProjectController } from '../controllers/ProjectController';
 import { authenticate, requireAdmin } from '../middleware/authMiddleware';
+import { validateProject } from '../middleware/validationMiddleware';
+import { handleUpload } from '../middleware/uploadMiddleware';
 import { Logger } from '../utils/logger';
 import { fileHelpers } from '../utils/helpers/fileHelpers';
 
@@ -9,12 +11,10 @@ export const router = Router();
 const projectController = new ProjectController();
 const logger = Logger.getInstance();
 
-// Configure multer for memory storage with file validation
+// Configure multer
 const upload = multer({
     storage: multer.memoryStorage(),
-    limits: {
-        fileSize: 5 * 1024 * 1024, // 5MB limit
-    },
+    limits: { fileSize: 5 * 1024 * 1024 },
     fileFilter: (req, file, cb) => {
         if (!fileHelpers.isValidImageType(file.mimetype)) {
             logger.warn('Invalid file type attempted to upload');
@@ -30,17 +30,28 @@ router.get('/', projectController.getAllProjects.bind(projectController));
 router.get('/featured', projectController.getFeaturedProjects.bind(projectController));
 router.get('/:id', projectController.getProjectById.bind(projectController));
 
-// Protected routes
-router.post('/', authenticate, requireAdmin, projectController.createProject.bind(projectController));
-router.put('/:id', authenticate, requireAdmin, projectController.updateProject.bind(projectController));
-router.delete('/:id', authenticate, requireAdmin, projectController.deleteProject.bind(projectController));
+// Protected routes with validation
+router.post('/', 
+    authenticate, 
+    requireAdmin,
+    validateProject,
+    projectController.createProject.bind(projectController)
+);
 
-// File upload routes
+router.put('/:id', 
+    authenticate, 
+    requireAdmin,
+    validateProject,
+    projectController.updateProject.bind(projectController)
+);
+
+// File upload routes with upload middleware
 router.post(
     '/:id/thumbnail',
     authenticate,
     requireAdmin,
     upload.single('thumbnail'),
+    handleUpload('projects'),
     projectController.uploadThumbnail.bind(projectController)
 );
 
@@ -49,6 +60,6 @@ router.post(
     authenticate,
     requireAdmin,
     upload.array('images', 5),
+    handleUpload('projects'),
     projectController.uploadImages.bind(projectController)
 );
-
