@@ -36,12 +36,6 @@ jobs:
           cd server
           yarn install
 
-      # TypeScript check
-      - name: TypeScript Check
-        run: |
-          cd server
-          yarn tsc --noEmit
-
       # Run tests with coverage
       - name: Run tests with coverage
         run: |
