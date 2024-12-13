@@ -136,7 +136,7 @@ export class Admin implements IAdminModel {
     async validatePassword(plainPassword: string, hashedPassword: string): Promise<boolean> {
         try {
             this.logger.debug('Validating password');
-            return bcrypt.compare(plainPassword, hashedPassword);
+            return await bcrypt.compare(plainPassword, hashedPassword);
         } catch (error: any) {
             this.logger.error('Failed to validate password:', error);
             throw new AppError(`Password validation error: ${error.message}`, 500);
