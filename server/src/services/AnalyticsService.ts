@@ -1,13 +1,22 @@
+// src/services/AnalyticsService.ts
 import { IAnalytics, ICreateAnalytics, IUpdateAnalytics } from '../types/entities';
 import { Analytics } from '../models/Analytics';
 import { Logger } from '../utils/logger';
 
 export class AnalyticsService {
+    private static instance: AnalyticsService;
     private analyticsModel: Analytics;
     private logger = Logger.getInstance();
 
-    constructor() {
+    private constructor() {
         this.analyticsModel = new Analytics();
+    }
+
+    public static getInstance(): AnalyticsService {
+        if (!AnalyticsService.instance) {
+            AnalyticsService.instance = new AnalyticsService();
+        }
+        return AnalyticsService.instance;
     }
 
     async getAnalytics(): Promise<IAnalytics[]> {
@@ -99,6 +108,17 @@ export class AnalyticsService {
         } catch (error: any) {
             this.logger.error('Failed to generate analytics report:', error);
             throw new Error(`Failed to generate analytics report: ${error.message}`);
+        }
+    }
+
+    async trackEvent(eventName: string, data: any): Promise<void> {
+        try {
+            // Implementation for tracking custom events
+            this.logger.info(`Event tracked: ${eventName}`, data);
+            // You might want to store this in your database or send to an external service
+        } catch (error: any) {
+            this.logger.error(`Failed to track event ${eventName}:`, error);
+            throw new Error(`Failed to track event: ${error.message}`);
         }
     }
 }

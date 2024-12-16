@@ -52,33 +52,36 @@ export class StorageService {
         }
     }
 
-    async deleteFile(fileUrl: string): Promise<void> {
-        try {
-            // Extract path from URL
-            const path = fileUrl.split('/').pop();
-            if (!path) {
-                this.logger.warn(`Invalid file URL provided: ${fileUrl}`);
-                throw new Error('Invalid file URL');
-            }
+    // server/src/services/StorageService.ts
+async deleteFile(fileUrl: string): Promise<void> {
+    try {
+        // Extract path from URL
+        const urlParts = fileUrl.split('/');
+        const path = urlParts.pop();
+        const bucket = urlParts.pop(); // Get bucket name from URL
 
-            // Get bucket name from URL
-            const bucket = fileUrl.split('/').slice(-2)[0];
-            this.logger.debug(`Deleting file: ${path} from bucket: ${bucket}`);
-
-            const { error } = await supabase
-                .storage
-                .from(bucket)
-                .remove([path]);
-
-            if (error) {
-                this.logger.error(`Storage deletion error:`, error);
-                throw error;
-            }
-
-            this.logger.info(`File deleted successfully: ${path}`);
-        } catch (error: any) {
-            this.logger.error('Failed to delete file:', error);
-            throw new Error(`Failed to delete file: ${error.message}`);
+        // Validate URL format
+        if (!path || !bucket || urlParts.length < 2) {
+            this.logger.warn(`Invalid file URL provided: ${fileUrl}`);
+            throw new Error('Invalid file URL');
         }
+
+        this.logger.debug(`Deleting file: ${path} from bucket: ${bucket}`);
+
+        const { error } = await supabase
+            .storage
+            .from(bucket)
+            .remove([path]);
+
+        if (error) {
+            this.logger.error(`Storage deletion error:`, error);
+            throw error;
+        }
+
+        this.logger.info(`File deleted successfully: ${path}`);
+    } catch (error: any) {
+        this.logger.error('Failed to delete file:', error);
+        throw new Error(`Failed to delete file: ${error.message}`);
     }
+}
 }

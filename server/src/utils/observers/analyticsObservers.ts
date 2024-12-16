@@ -1,3 +1,4 @@
+// src/utils/observers/analyticsObservers.ts
 import { AnalyticsService } from '../../services/AnalyticsService';
 
 export class AnalyticsObserver {
@@ -5,7 +6,7 @@ export class AnalyticsObserver {
     private analyticsService: AnalyticsService;
 
     private constructor() {
-        this.analyticsService = new AnalyticsService();
+        this.analyticsService = AnalyticsService.getInstance();
     }
 
     static getInstance(): AnalyticsObserver {
@@ -17,7 +18,7 @@ export class AnalyticsObserver {
 
     async trackPageView(page: string): Promise<void> {
         try {
-            await this.analyticsService.recordPageView();  // Changed from incrementPageViews()
+            await this.analyticsService.recordPageView();
         } catch (error) {
             console.error(`Failed to track page view for ${page}:`, error);
         }
@@ -25,10 +26,7 @@ export class AnalyticsObserver {
 
     async trackEvent(eventName: string, data: any): Promise<void> {
         try {
-            // Implement your event tracking logic here
-            console.log(`Tracking event: ${eventName}`, data);
-            // You might want to store this in your analytics service
-            // await this.analyticsService.logEvent(eventName, data);
+            await this.analyticsService.trackEvent(eventName, data);
         } catch (error) {
             console.error(`Failed to track event ${eventName}:`, error);
         }
@@ -36,7 +34,9 @@ export class AnalyticsObserver {
 
     async trackProjectView(projectId: string): Promise<void> {
         try {
-            // Implementation for tracking project views
+            await this.analyticsService.recordPageView();
+            // You might want to update most viewed projects here
+            // await this.analyticsService.updateMostViewedProjects([projectId]);
         } catch (error) {
             console.error(`Failed to track project view for ${projectId}:`, error);
         }

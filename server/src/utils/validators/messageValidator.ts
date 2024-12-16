@@ -1,3 +1,4 @@
+// src/utils/validators/messageValidator.ts
 import { ICreateMessage } from '../../types/entities';
 import { stringHelpers } from '../helpers/stringHelpers';
 
@@ -13,6 +14,10 @@ export const messageValidator = {
             errors.push('Sender email is required');
         } else if (!stringHelpers.isValidEmail(data.senderEmail)) {
             errors.push('Invalid email format');
+        }
+
+        if (!data.subject?.trim()) {
+            errors.push('Subject is required');
         }
 
         if (!data.message?.trim()) {

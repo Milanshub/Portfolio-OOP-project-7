@@ -11,7 +11,7 @@ export class AnalyticsController {
     private cache = new Cache<any>(1 * 60 * 1000); // 1 minute cache for analytics
 
     constructor() {
-        this.analyticsService = new AnalyticsService();
+        this.analyticsService = AnalyticsService.getInstance();  
     }
 
     async getAnalytics(req: Request, res: Response): Promise<void> {
