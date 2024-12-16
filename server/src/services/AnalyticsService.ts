@@ -1,7 +1,9 @@
-// src/services/AnalyticsService.ts
+// server/src/services/AnalyticsService.ts
+
 import { IAnalytics, ICreateAnalytics, IUpdateAnalytics } from '../types/entities';
 import { Analytics } from '../models/Analytics';
 import { Logger } from '../utils/logger';
+import { AppError } from '../middleware/errorMiddleware';
 
 export class AnalyticsService {
     private static instance: AnalyticsService;
@@ -26,7 +28,7 @@ export class AnalyticsService {
             return analytics;
         } catch (error: any) {
             this.logger.error('Failed to get analytics:', error);
-            throw new Error(`Failed to get analytics: ${error.message}`);
+            throw new AppError('Failed to get analytics', 500);
         }
     }
 
@@ -37,7 +39,7 @@ export class AnalyticsService {
             return analytics;
         } catch (error: any) {
             this.logger.error('Failed to get latest analytics:', error);
-            throw new Error(`Failed to get latest analytics: ${error.message}`);
+            throw new AppError('Failed to get latest analytics', 500);
         }
     }
 
@@ -48,7 +50,7 @@ export class AnalyticsService {
             return analytics;
         } catch (error: any) {
             this.logger.error('Failed to create analytics:', error);
-            throw new Error(`Failed to create analytics: ${error.message}`);
+            throw new AppError('Failed to create analytics', 500);
         }
     }
 
@@ -56,14 +58,13 @@ export class AnalyticsService {
         try {
             const updatedAnalytics = await this.analyticsModel.update(id, analyticsData);
             if (!updatedAnalytics) {
-                this.logger.warn(`Analytics not found with ID: ${id}`);
-                throw new Error('Analytics not found');
+                throw new AppError('Analytics not found', 404);
             }
             this.logger.info(`Analytics updated successfully: ${id}`);
             return updatedAnalytics;
         } catch (error: any) {
             this.logger.error('Failed to update analytics:', error);
-            throw new Error(`Failed to update analytics: ${error.message}`);
+            throw new AppError(error.message, error.statusCode || 500);
         }
     }
 
@@ -73,7 +74,7 @@ export class AnalyticsService {
             this.logger.info('Page view recorded successfully');
         } catch (error: any) {
             this.logger.error('Failed to record page view:', error);
-            throw new Error(`Failed to record page view: ${error.message}`);
+            throw new AppError('Failed to record page view', 500);
         }
     }
 
@@ -83,7 +84,7 @@ export class AnalyticsService {
             this.logger.info('Most viewed projects updated successfully');
         } catch (error: any) {
             this.logger.error('Failed to update most viewed projects:', error);
-            throw new Error(`Failed to update most viewed projects: ${error.message}`);
+            throw new AppError('Failed to update most viewed projects', 500);
         }
     }
 
@@ -91,8 +92,7 @@ export class AnalyticsService {
         try {
             const latest = await this.analyticsModel.getLatestAnalytics();
             if (!latest) {
-                this.logger.warn('No analytics data available for report generation');
-                throw new Error('No analytics data available');
+                throw new AppError('No analytics data available', 404);
             }
 
             const report = {
@@ -107,18 +107,24 @@ export class AnalyticsService {
             return report;
         } catch (error: any) {
             this.logger.error('Failed to generate analytics report:', error);
-            throw new Error(`Failed to generate analytics report: ${error.message}`);
+            throw new AppError(error.message, error.statusCode || 500);
         }
     }
 
-    async trackEvent(eventName: string, data: any): Promise<void> {
+    async trackEvent(eventName: string, data: any = {}): Promise<void> {
         try {
-            // Implementation for tracking custom events
+            await this.analyticsModel.createEvent({
+                name: eventName,
+                data,
+                timestamp: new Date()
+            });
             this.logger.info(`Event tracked: ${eventName}`, data);
-            // You might want to store this in your database or send to an external service
         } catch (error: any) {
             this.logger.error(`Failed to track event ${eventName}:`, error);
-            throw new Error(`Failed to track event: ${error.message}`);
+            throw new AppError('Failed to track event', 500);
         }
     }
 }
+
+// Export singleton instance
+export const analyticsService = AnalyticsService.getInstance();

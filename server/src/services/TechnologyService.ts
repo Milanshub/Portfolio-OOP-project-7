@@ -5,6 +5,7 @@ import { Logger } from '../utils/logger';
 export class TechnologyService {
     private technologyModel: Technology;
     private logger = Logger.getInstance();
+    
 
     constructor() {
         this.technologyModel = new Technology();

@@ -2,13 +2,13 @@ import { IProfile, IUpdateProfile } from '../types/entities';
 import { Profile } from '../models/Profile';
 import { StorageService } from './StorageService';
 import { Logger } from '../utils/logger';
-
+import { AppError } from '@/middleware/errorMiddleware';
 
 export class ProfileService {
     private profileModel: Profile;
     private storageService: StorageService;
     private logger = Logger.getInstance();
-
+    
     constructor() {
         this.profileModel = new Profile();
         this.storageService = new StorageService();
@@ -18,12 +18,12 @@ export class ProfileService {
         try {
             const profiles = await this.profileModel.findAll();
             if (!profiles.length) {
-                throw new Error('No profile found');
+                throw new AppError('No profile found', 404); // AppError with status code
             }
-            return profiles[0]; // Assuming we only have one profile
+            return profiles[0];
         } catch (error: any) {
             this.logger.error('Failed to get profile:', error);
-            throw new Error(`Failed to get profile: ${error.message}`);
+            throw new AppError(`Failed to get profile: ${error.message}`, error.statusCode || 500);
         }
     }
 
@@ -90,4 +90,5 @@ export class ProfileService {
             throw new Error(`Failed to update resume: ${error.message}`);
         }
     }
+
 }

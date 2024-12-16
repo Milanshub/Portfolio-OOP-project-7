@@ -7,6 +7,8 @@ import { AppError } from '../middleware/errorMiddleware';
 export class Analytics implements IAnalyticsModel {
     private logger = Logger.getInstance();
     private tableName = 'analytics';
+    private eventsTableName = 'analytics_events'; // Add this property
+
 
     async findAll(): Promise<IAnalytics[]> {
         try {
@@ -144,6 +146,25 @@ export class Analytics implements IAnalyticsModel {
             }
         } catch (error: any) {
             this.logger.error('Failed to update most viewed projects:', error);
+            throw new AppError(`Database error: ${error.message}`, 500);
+        }
+    }
+
+    async createEvent(event: { name: string; data: any; timestamp: Date }): Promise<void> {
+        try {
+            const { error } = await supabase
+                .from(this.eventsTableName)
+                .insert({
+                    event_name: event.name,
+                    event_data: event.data,
+                    timestamp: event.timestamp
+                });
+
+            if (error) throw error;
+            
+            this.logger.info(`Analytics event created: ${event.name}`);
+        } catch (error: any) {
+            this.logger.error('Failed to create analytics event:', error);
             throw new AppError(`Database error: ${error.message}`, 500);
         }
     }

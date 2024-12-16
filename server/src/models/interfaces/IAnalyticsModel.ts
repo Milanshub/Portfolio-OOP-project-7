@@ -9,4 +9,9 @@ export interface IAnalyticsModel extends IRepository<
     getLatestAnalytics(): Promise<IAnalytics | null>;
     incrementPageViews(): Promise<void>;
     updateMostViewedProjects(projectIds: string[]): Promise<void>;
+    createEvent(event: {
+        name: string;
+        data: any;
+        timestamp: Date;
+    }): Promise<void>;
 }

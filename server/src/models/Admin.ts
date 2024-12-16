@@ -1,3 +1,5 @@
+// server/src/models/Admin.ts
+
 import { IAdmin } from '../types/entities';
 import { IAdminModel } from './interfaces/IAdminModel';
 import { supabase } from '../config/supabase';
@@ -8,6 +10,7 @@ import { AppError } from '../middleware/errorMiddleware';
 export class Admin implements IAdminModel {
     private logger = Logger.getInstance();
     private tableName = 'admins';
+    private saltRounds = 10;
 
     async findAll(): Promise<IAdmin[]> {
         try {
@@ -44,7 +47,7 @@ export class Admin implements IAdminModel {
     async create(admin: Omit<IAdmin, 'id' | 'lastLogin'>): Promise<IAdmin> {
         try {
             this.logger.debug('Creating new admin:', { ...admin, password: '[REDACTED]' });
-            const hashedPassword = await bcrypt.hash(admin.password, 10);
+            const hashedPassword = await bcrypt.hash(admin.password, this.saltRounds);
             
             const { data, error } = await supabase
                 .from(this.tableName)
@@ -64,7 +67,7 @@ export class Admin implements IAdminModel {
         try {
             this.logger.debug(`Updating admin ${id}:`, { ...admin, password: admin.password ? '[REDACTED]' : undefined });
             if (admin.password) {
-                admin.password = await bcrypt.hash(admin.password, 10);
+                admin.password = await bcrypt.hash(admin.password, this.saltRounds);
             }
 
             const { data, error } = await supabase
@@ -115,18 +118,15 @@ export class Admin implements IAdminModel {
         }
     }
 
-    async updateLastLogin(id: string): Promise<IAdmin | null> {
+    async updateLastLogin(id: string): Promise<void> {
         try {
             this.logger.debug(`Updating last login for admin ${id}`);
-            const { data, error } = await supabase
+            const { error } = await supabase
                 .from(this.tableName)
                 .update({ lastLogin: new Date() })
-                .eq('id', id)
-                .select()
-                .single();
+                .eq('id', id);
             
             if (error) throw error;
-            return data as IAdmin;
         } catch (error: any) {
             this.logger.error(`Failed to update last login for admin ${id}:`, error);
             throw new AppError(`Database error: ${error.message}`, 500);
@@ -140,6 +140,24 @@ export class Admin implements IAdminModel {
         } catch (error: any) {
             this.logger.error('Failed to validate password:', error);
             throw new AppError(`Password validation error: ${error.message}`, 500);
+        }
+    }
+
+    async updatePassword(id: string, newPassword: string): Promise<void> {
+        try {
+            this.logger.debug(`Updating password for admin ${id}`);
+            const hashedPassword = await bcrypt.hash(newPassword, this.saltRounds);
+            
+            const { error } = await supabase
+                .from(this.tableName)
+                .update({ password: hashedPassword })
+                .eq('id', id);
+
+            if (error) throw error;
+            this.logger.info(`Password updated for admin: ${id}`);
+        } catch (error: any) {
+            this.logger.error(`Failed to update password for admin ${id}:`, error);
+            throw new AppError(`Failed to update password: ${error.message}`, 500);
         }
     }
 }

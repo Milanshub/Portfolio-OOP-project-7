@@ -3,6 +3,7 @@ import { IProjectModel } from './interfaces/IProjectModel';
 import { supabase } from '../config/supabase';
 import { Logger } from '../utils/logger';
 import { AppError } from '../middleware/errorMiddleware';
+import { IGitHubRepoMetadata } from './interfaces/IGitHubModel';
 
 export class Project implements IProjectModel {
     private logger = Logger.getInstance();
@@ -161,6 +162,40 @@ export class Project implements IProjectModel {
         } catch (error: any) {
             this.logger.error(`Failed to update order for project ${id}:`, error);
             throw new AppError(`Database error: ${error.message}`, 500);
+        }
+    }
+
+    async updateTechnologies(id: string, technologyIds: string[]): Promise<IProject | null> {
+        try {
+            const { data, error } = await supabase
+                .from(this.tableName)
+                .update({ technologies: technologyIds })
+                .eq('id', id)
+                .select()
+                .single();
+
+            if (error) throw error;
+            return data;
+        } catch (error: any) {
+            this.logger.error(`Failed to update technologies for project ${id}:`, error);
+            throw new Error(`Failed to update technologies: ${error.message}`);
+        }
+    }
+
+    async updateGitHubData(id: string, data: IGitHubRepoMetadata): Promise<IProject | null> {
+        try {
+            const { data: updatedProject, error } = await supabase
+                .from(this.tableName)
+                .update({ githubData: data })
+                .eq('id', id)
+                .select()
+                .single();
+
+            if (error) throw error;
+            return updatedProject;
+        } catch (error: any) {
+            this.logger.error(`Failed to update GitHub data for project ${id}:`, error);
+            throw new Error(`Failed to update GitHub data: ${error.message}`);
         }
     }
 }

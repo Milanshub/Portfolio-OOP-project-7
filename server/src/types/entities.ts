@@ -7,15 +7,24 @@ export interface IProject {
     thumbnail: string;
     images: string[];
     liveUrl: string;
-    githubUrl: string;
+    githubUrl?: string;  // Make githubUrl optional in base interface
     featured: boolean;
     order: number;
     startDate: Date;
     endDate: Date;
-};
+    technologies: string[];
+    githubData?: {
+        stars: number;
+        forks: number;
+        lastCommit: Date;
+        languages: Record<string, number>;
+    };
+}
 
-export interface ICreateProject extends Omit<IProject, 'id'> {};
-export interface IUpdateProject extends Partial<ICreateProject> {};
+// No need to redeclare optional fields that are already optional in IProject
+export interface ICreateProject extends Omit<IProject, 'id'> {}
+
+export interface IUpdateProject extends Partial<ICreateProject> {}
 
 // Profile interfaces
 export interface IProfile {
@@ -89,5 +98,17 @@ export interface IAnalytics {
     updatedAt: Date;
 }
 
-export interface ICreateAnalytics extends Omit<IAnalytics, 'id' | 'createdAt' | 'updatedAt'> {};
-export interface IUpdateAnalytics extends Partial<ICreateAnalytics> {};
+// Add these new interfaces
+export interface IAnalyticsEvent {
+    id: string;
+    event_name: string;
+    event_data: any;
+    timestamp: Date;
+    created_at: Date;
+}
+
+export interface ICreateAnalyticsEvent extends Omit<IAnalyticsEvent, 'id' | 'created_at'> {}
+export interface IUpdateAnalyticsEvent extends Partial<ICreateAnalyticsEvent> {}
+
+export interface ICreateAnalytics extends Omit<IAnalytics, 'id' | 'createdAt' | 'updatedAt'> {}
+export interface IUpdateAnalytics extends Partial<ICreateAnalytics> {}
