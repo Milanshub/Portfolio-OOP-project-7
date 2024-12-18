@@ -17,6 +17,23 @@ jest.mock('../../src/utils/validators/messageValidator', () => ({
         })
     }
 }));
+
+// Mock Cache
+const mockCacheData: { [key: string]: any } = {};
+jest.mock('../../src/utils/cache', () => ({
+    Cache: jest.fn().mockImplementation(() => ({
+        get: jest.fn((key: string) => mockCacheData[key]),
+        set: jest.fn((key: string, value: any) => {
+            mockCacheData[key] = value;
+            return true;
+        }),
+        clear: jest.fn(() => {
+            Object.keys(mockCacheData).forEach(key => delete mockCacheData[key]);
+        })
+    }))
+}));
+
+// Mock Logger
 jest.mock('../../src/utils/logger', () => ({
     Logger: {
         getInstance: () => ({
@@ -28,12 +45,21 @@ jest.mock('../../src/utils/logger', () => ({
     }
 }));
 
+// Mock Resend
+jest.mock('resend', () => ({
+    Resend: jest.fn().mockImplementation(() => ({
+        emails: {
+            send: jest.fn().mockResolvedValue({ id: 'mock-email-id' })
+        }
+    }))
+}));
+
 describe('MessageController', () => {
     let messageController: MessageController;
 
-
     beforeEach(() => {
         jest.clearAllMocks();
+        Object.keys(mockCacheData).forEach(key => delete mockCacheData[key]);
         messageController = new MessageController();
     });
 
@@ -41,13 +67,35 @@ describe('MessageController', () => {
         it('should return all messages successfully', async () => {
             const mockMessages = [mockMessage];
             jest.spyOn(MessageService.prototype, 'getAllMessages')
-                .mockResolvedValue([mockMessage]);
+                .mockResolvedValue(mockMessages);
 
             const req = mockRequest();
             const res = mockResponse();
 
             await messageController.getAllMessages(req as Request, res as Response);
 
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.json).toHaveBeenCalledWith(mockMessages);
+        });
+
+        it('should serve from cache if available', async () => {
+            const mockMessages = [mockMessage];
+            const req = mockRequest();
+            const res = mockResponse();
+
+            // First call to populate cache
+            jest.spyOn(MessageService.prototype, 'getAllMessages')
+                .mockResolvedValue(mockMessages);
+            await messageController.getAllMessages(req as Request, res as Response);
+
+            // Reset response mock
+            (res.json as jest.Mock).mockClear();
+            (res.status as jest.Mock).mockClear();
+
+            // Second call should use cache
+            await messageController.getAllMessages(req as Request, res as Response);
+
+            expect(MessageService.prototype.getAllMessages).toHaveBeenCalledTimes(1);
             expect(res.status).toHaveBeenCalledWith(200);
             expect(res.json).toHaveBeenCalledWith(mockMessages);
         });
@@ -76,16 +124,16 @@ describe('MessageController', () => {
                 }
             });
             const res = mockResponse();
-    
+
             jest.spyOn(MessageService.prototype, 'createMessage')
                 .mockResolvedValue(mockMessage);
-    
+
             await messageController.createMessage(req as Request, res as Response);
-    
+
             expect(res.status).toHaveBeenCalledWith(201);
             expect(res.json).toHaveBeenCalledWith(mockMessage);
         });
-    
+
         it('should validate message data', async () => {
             const req = mockRequest({
                 body: {
@@ -95,9 +143,9 @@ describe('MessageController', () => {
                 }
             });
             const res = mockResponse();
-    
+
             await messageController.createMessage(req as Request, res as Response);
-    
+
             expect(res.status).toHaveBeenCalledWith(400);
             expect(res.json).toHaveBeenCalledWith({
                 errors: expect.arrayContaining([
@@ -156,6 +204,29 @@ describe('MessageController', () => {
             expect(res.status).toHaveBeenCalledWith(200);
             expect(res.json).toHaveBeenCalledWith(unreadMessages);
         });
+
+        it('should serve from cache if available', async () => {
+            const unreadMessages = [mockMessage];
+            const req = mockRequest();
+            const res = mockResponse();
+
+            jest.spyOn(MessageService.prototype, 'getUnreadMessages')
+                .mockResolvedValue(unreadMessages);
+
+            // First call to populate cache
+            await messageController.getUnreadMessages(req as Request, res as Response);
+
+            // Reset response mock
+            (res.json as jest.Mock).mockClear();
+            (res.status as jest.Mock).mockClear();
+
+            // Second call should use cache
+            await messageController.getUnreadMessages(req as Request, res as Response);
+
+            expect(MessageService.prototype.getUnreadMessages).toHaveBeenCalledTimes(1);
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.json).toHaveBeenCalledWith(unreadMessages);
+        });
     });
 
     describe('getUnreadCount', () => {
@@ -168,6 +239,28 @@ describe('MessageController', () => {
 
             await messageController.getUnreadCount(req as Request, res as Response);
 
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.json).toHaveBeenCalledWith({ count: 5 });
+        });
+
+        it('should serve from cache if available', async () => {
+            const req = mockRequest();
+            const res = mockResponse();
+
+            jest.spyOn(MessageService.prototype, 'getUnreadCount')
+                .mockResolvedValue(5);
+
+            // First call to populate cache
+            await messageController.getUnreadCount(req as Request, res as Response);
+
+            // Reset response mock
+            (res.json as jest.Mock).mockClear();
+            (res.status as jest.Mock).mockClear();
+
+            // Second call should use cache
+            await messageController.getUnreadCount(req as Request, res as Response);
+
+            expect(MessageService.prototype.getUnreadCount).toHaveBeenCalledTimes(1);
             expect(res.status).toHaveBeenCalledWith(200);
             expect(res.json).toHaveBeenCalledWith({ count: 5 });
         });

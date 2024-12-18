@@ -1,7 +1,27 @@
 import { Request, Response } from 'express';
-import { IProject, IAnalytics, IAdmin, IMessage, IProfile, ITechnology, TechnologyCategory } from '../../src/types/entities';
+import { 
+    IProject, 
+    IAnalytics, 
+    IAdmin, 
+    IMessage, 
+    IProfile, 
+    ITechnology, 
+    TechnologyCategory,
+    IAnalyticsEvent
+} from '../../src/types/entities';
 import { Express } from 'express';
 
+// Auth related interfaces
+export interface AuthRequest extends Request {
+    admin?: IAdmin;
+}
+
+export interface AuthResponse {
+    admin: IAdmin;
+    token: string;
+}
+
+// Mock Project
 export const mockProject: IProject = {
     id: '1',
     title: 'Test Project',
@@ -14,9 +34,17 @@ export const mockProject: IProject = {
     featured: false,
     order: 1,
     startDate: new Date(),
-    endDate: new Date()
+    endDate: new Date(),
+    technologies: ['React', 'Node.js'],
+    githubData: {
+        stars: 10,
+        forks: 5,
+        lastCommit: new Date(),
+        languages: { TypeScript: 80, JavaScript: 20 }
+    }
 };
 
+// Mock Technology
 export const mockTechnology: ITechnology = {
     id: '1',
     name: 'React',
@@ -25,7 +53,7 @@ export const mockTechnology: ITechnology = {
     proficiencyLevel: 80
 };
 
-
+// Mock Message
 export const mockMessage: IMessage = {
     id: '1',
     senderName: 'John Doe',
@@ -36,6 +64,7 @@ export const mockMessage: IMessage = {
     read: false
 };
 
+// Mock Profile
 export const mockProfile: IProfile = {
     id: '1',
     fullName: 'John Doe',
@@ -47,6 +76,7 @@ export const mockProfile: IProfile = {
     email: 'john@example.com'
 };
 
+// Mock Analytics
 export const mockAnalytics: IAnalytics = {
     id: '1',
     pageViews: 100,
@@ -57,6 +87,16 @@ export const mockAnalytics: IAnalytics = {
     updatedAt: new Date()
 };
 
+// Mock Analytics Event
+export const mockAnalyticsEvent: IAnalyticsEvent = {
+    id: '1',
+    event_name: 'page_view',
+    event_data: { page: 'home' },
+    timestamp: new Date(),
+    created_at: new Date()
+};
+
+// Mock Admin
 export const mockAdmin: IAdmin = {
     id: '1',
     email: 'test@example.com',
@@ -65,14 +105,22 @@ export const mockAdmin: IAdmin = {
     lastLogin: new Date()
 };
 
-export const mockRequest = (options: Partial<Request> = {}): Partial<Request> => ({
+// Mock Auth Response
+export const mockAuthResponse: AuthResponse = {
+    admin: mockAdmin,
+    token: 'mock-jwt-token'
+};
+
+// Mock Request Helper
+export const mockRequest = (options: Partial<AuthRequest> = {}): Partial<AuthRequest> => ({
     body: {},
     params: {},
     query: {},
-    headers: {}, 
+    headers: {},
     ...options
 });
 
+// Mock Response Helper
 export const mockResponse = (): Partial<Response> => {
     const res: Partial<Response> = {
         status: jest.fn().mockReturnThis(),
@@ -82,6 +130,7 @@ export const mockResponse = (): Partial<Response> => {
     return res;
 };
 
+// Mock File Helper
 export const createMockFile = (partial: Partial<Express.Multer.File> = {}): Express.Multer.File => ({
     fieldname: 'file',
     originalname: 'test.jpg',
@@ -95,4 +144,3 @@ export const createMockFile = (partial: Partial<Express.Multer.File> = {}): Expr
     buffer: Buffer.from([]),
     ...partial
 });
-
