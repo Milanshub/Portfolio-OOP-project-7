@@ -109,9 +109,10 @@ export class TechnologyController {
             const { id } = req.params;
             const { level } = req.body;
 
-            if (typeof level !== 'number' || level < 0 || level > 100) {
+            // Update the proficiency level validation in updateProficiencyLevel method
+            if (typeof level !== 'number' || level < 1 || level > 10) {
                 this.logger.warn(`Invalid proficiency level: ${level}`);
-                res.status(400).json({ error: 'Proficiency level must be between 0 and 100' });
+                res.status(400).json({ error: 'Proficiency level must be between 1 and 10' });
                 return;
             }
 
@@ -125,5 +126,4 @@ export class TechnologyController {
         }
     }
 
-    // ... similar updates for other methods
 }

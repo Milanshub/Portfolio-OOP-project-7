@@ -1,5 +1,3 @@
-// server/src/services/AnalyticsService.ts
-
 import { IAnalytics, ICreateAnalytics, IUpdateAnalytics } from '../types/entities';
 import { Analytics } from '../models/Analytics';
 import { Logger } from '../utils/logger';
@@ -64,6 +62,21 @@ export class AnalyticsService {
             return updatedAnalytics;
         } catch (error: any) {
             this.logger.error('Failed to update analytics:', error);
+            throw new AppError(error.message, error.statusCode || 500);
+        }
+    }
+
+    async deleteAnalytics(id: string): Promise<void> {
+        try {
+            const analytics = await this.analyticsModel.findById(id);
+            if (!analytics) {
+                throw new AppError('Analytics not found', 404);
+            }
+
+            await this.analyticsModel.delete(id);
+            this.logger.info(`Analytics deleted successfully: ${id}`);
+        } catch (error: any) {
+            this.logger.error('Failed to delete analytics:', error);
             throw new AppError(error.message, error.statusCode || 500);
         }
     }

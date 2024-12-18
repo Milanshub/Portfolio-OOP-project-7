@@ -34,4 +34,37 @@ export class Cache<T> {
     clear(): void {
         this.cache.clear();
     }
+
+    getEntries(): Array<[string, T]> {
+        this.clearExpired();
+        return Array.from(this.cache.entries())
+            .map(([key, { data }]) => [key, data]);
+    }
+
+    private clearExpired(): void {
+        const now = Date.now();
+        for (const [key, item] of this.cache.entries()) {
+            if (now - item.timestamp > this.ttl) {
+                this.cache.delete(key);
+            }
+        }
+    }
+
+    // Optional: Get cache size
+    size(): number {
+        this.clearExpired();
+        return this.cache.size;
+    }
+
+    // Optional: Check if key exists
+    has(key: string): boolean {
+        const item = this.cache.get(key);
+        if (!item) return false;
+        
+        if (Date.now() - item.timestamp > this.ttl) {
+            this.cache.delete(key);
+            return false;
+        }
+        return true;
+    }
 }
