@@ -17,29 +17,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Cache server dependencies
-      - name: Cache server dependencies
-        uses: actions/cache@v3
-        with:
-          path: server/node_modules
-          key: server-node-modules-${{ runner.os }}-${{ matrix.node-version }}-${{ hashFiles('server/package.json') }}
-
       # Set up Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
 
-      # Install server dependencies
-      - name: Install server dependencies
+      # Clear cache and install fresh dependencies
+      - name: Clean install server dependencies
         run: |
           cd server
-          yarn install
+          rm -rf node_modules
+          rm -f yarn.lock
+          yarn cache clean
+          yarn install --force
 
       # Run tests with coverage
       - name: Run tests with coverage
         run: |
           cd server
           yarn test --coverage
-
-    
