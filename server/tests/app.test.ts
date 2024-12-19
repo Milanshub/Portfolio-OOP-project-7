@@ -59,7 +59,7 @@ jest.mock('../src/utils/observers/analyticsObservers', () => ({
     }
 }));
 
-describe.skip('App', () => {
+describe('App', () => {
     const logger = Logger.getInstance();
 
     beforeEach(() => {
