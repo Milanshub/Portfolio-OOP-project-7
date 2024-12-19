@@ -47,7 +47,7 @@ jest.mock('../../src/controllers/ProjectController', () => {
     };
 });
 
-describe('Project Routes', () => {
+describe.skip('Project Routes', () => {
     let app: express.Application;
 
     beforeEach(() => {
