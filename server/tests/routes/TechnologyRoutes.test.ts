@@ -1,13 +1,19 @@
 import request from 'supertest';
 import express from 'express';
-import { Request, Response, NextFunction } from 'express-serve-static-core';
 import { router as technologyRoutes } from '../../src/routes/TechnologyRoutes';
 import { TechnologyController } from '../../src/controllers/TechnologyController';
-import { authenticate } from '../../src/middleware/authMiddleware';
+import { authenticate, requireAdmin } from '../../src/middleware/authMiddleware';
+import { validateTechnology } from '../../src/middleware/validationMiddleware';
+import { Request, Response, NextFunction } from 'express-serve-static-core';
 
 // Mock middleware
 jest.mock('../../src/middleware/authMiddleware', () => ({
-    authenticate: jest.fn((req: Request, res: Response, next: NextFunction) => next())
+    authenticate: jest.fn((req: Request, res: Response, next: NextFunction) => next()),
+    requireAdmin: jest.fn((req: Request, res: Response, next: NextFunction) => next())
+}));
+
+jest.mock('../../src/middleware/validationMiddleware', () => ({
+    validateTechnology: jest.fn((req: Request, res: Response, next: NextFunction) => next())
 }));
 
 // Mock the controller methods
@@ -70,6 +76,8 @@ describe('Technology Routes', () => {
 
             expect(response.status).toBe(201);
             expect(authenticate).toHaveBeenCalled();
+            expect(requireAdmin).toHaveBeenCalled();
+            expect(validateTechnology).toHaveBeenCalled();
         });
 
         it('PUT /:id should update technology', async () => {
@@ -82,6 +90,8 @@ describe('Technology Routes', () => {
 
             expect(response.status).toBe(200);
             expect(authenticate).toHaveBeenCalled();
+            expect(requireAdmin).toHaveBeenCalled();
+            expect(validateTechnology).toHaveBeenCalled();
         });
 
         it('DELETE /:id should delete technology', async () => {
@@ -90,6 +100,7 @@ describe('Technology Routes', () => {
 
             expect(response.status).toBe(204);
             expect(authenticate).toHaveBeenCalled();
+            expect(requireAdmin).toHaveBeenCalled();
         });
 
         it('PUT /:id/proficiency should update proficiency level', async () => {
@@ -99,6 +110,8 @@ describe('Technology Routes', () => {
 
             expect(response.status).toBe(200);
             expect(authenticate).toHaveBeenCalled();
+            expect(requireAdmin).toHaveBeenCalled();
+            expect(validateTechnology).toHaveBeenCalled();
         });
     });
 });

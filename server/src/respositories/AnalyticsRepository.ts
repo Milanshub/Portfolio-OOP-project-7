@@ -1,10 +1,10 @@
 import { IAnalytics } from '../types/entities';
-import { IAnalyticsModel } from './interfaces/IAnalyticsModel';
+import { IAnalyticsModel } from '../models/interfaces/IAnalyticsModel';
 import { supabase } from '../config/supabase';
 import { Logger } from '../utils/logger';
 import { AppError } from '../middleware/errorMiddleware';
 
-export class Analytics implements IAnalyticsModel {
+export class AnalyticsRepository implements IAnalyticsModel {
     private logger = Logger.getInstance();
     private tableName = 'analytics';
     private eventsTableName = 'analytics_events'; // Add this property

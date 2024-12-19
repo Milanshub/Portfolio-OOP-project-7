@@ -38,13 +38,16 @@ describe('ValidationMiddleware', () => {
             const req = mockRequest({
                 body: {
                     title: 'Test Project',
-                    description: 'Test Description'
+                    description: 'Test Description',
+                    shortDescription: 'Short Test Description',
+                    liveUrl: 'https://example.com',
+                    githubUrl: 'https://github.com/test/project'
                 }
             });
             const res = mockResponse();
-
+    
             validationMiddleware.validateProject(req as Request, res as Response, mockNext);
-
+    
             expect(mockNext).toHaveBeenCalledWith();
         });
 
@@ -90,7 +93,10 @@ describe('ValidationMiddleware', () => {
             const req = mockRequest({
                 body: {
                     fullName: 'John Doe',
-                    email: 'john@example.com'
+                    email: 'john@example.com',
+                    title: 'Software Engineer',
+                    bio: 'Test bio',
+                    location: 'New York'
                 }
             });
             const res = mockResponse();

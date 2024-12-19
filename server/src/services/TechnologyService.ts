@@ -1,19 +1,19 @@
 import { ITechnology, ICreateTechnology, IUpdateTechnology, TechnologyCategory } from '../types/entities';
-import { Technology } from '../models/Technology';
+import { TechnologyRepository } from '../respositories/TechnologyRepository';
 import { Logger } from '../utils/logger';
 
 export class TechnologyService {
-    private technologyModel: Technology;
+    private technologyRepository: TechnologyRepository;
     private logger = Logger.getInstance();
     
 
     constructor() {
-        this.technologyModel = new Technology();
+        this.technologyRepository = new TechnologyRepository();
     }
 
     async getAllTechnologies(): Promise<ITechnology[]> {
         try {
-            const technologies = await this.technologyModel.findAll();
+            const technologies = await this.technologyRepository.findAll();
             this.logger.info('All technologies retrieved successfully');
             return technologies;
         } catch (error: any) {
@@ -24,7 +24,7 @@ export class TechnologyService {
 
     async getTechnologyById(id: string): Promise<ITechnology> {
         try {
-            const technology = await this.technologyModel.findById(id);
+            const technology = await this.technologyRepository.findById(id);
             if (!technology) {
                 this.logger.warn(`Technology not found with ID: ${id}`);
                 throw new Error('Technology not found');
@@ -44,7 +44,7 @@ export class TechnologyService {
                 this.logger.warn(`Invalid category attempted: ${category}`);
                 throw new Error('Invalid category');
             }
-            const technologies = await this.technologyModel.findByCategory(category);
+            const technologies = await this.technologyRepository.findByCategory(category);
             this.logger.info(`Technologies retrieved for category: ${category}`);
             return technologies;
         } catch (error: any) {
@@ -67,7 +67,7 @@ export class TechnologyService {
                 throw new Error('Proficiency level must be between 1 and 10');
             }
 
-            const technology = await this.technologyModel.create(technologyData);
+            const technology = await this.technologyRepository.create(technologyData);
             this.logger.info(`New technology created: ${technology.id}`);
             return technology;
         } catch (error: any) {
@@ -91,7 +91,7 @@ export class TechnologyService {
                 throw new Error('Proficiency level must be between 1 and 10');
             }
 
-            const technology = await this.technologyModel.update(id, technologyData);
+            const technology = await this.technologyRepository.update(id, technologyData);
             if (!technology) {
                 this.logger.warn(`Technology not found for update: ${id}`);
                 throw new Error('Technology not found');
@@ -106,12 +106,12 @@ export class TechnologyService {
 
     async deleteTechnology(id: string): Promise<boolean> {
         try {
-            const technology = await this.technologyModel.findById(id);
+            const technology = await this.technologyRepository.findById(id);
             if (!technology) {
                 this.logger.warn(`Technology not found for deletion: ${id}`);
                 throw new Error('Technology not found');
             }
-            const result = await this.technologyModel.delete(id);
+            const result = await this.technologyRepository.delete(id);
             if (result) {
                 this.logger.info(`Technology deleted successfully: ${id}`);
             }
@@ -129,7 +129,7 @@ export class TechnologyService {
                 throw new Error('Proficiency level must be between 1 and 10');
             }
 
-            const technology = await this.technologyModel.updateProficiencyLevel(id, level);
+            const technology = await this.technologyRepository.updateProficiencyLevel(id, level);
             if (!technology) {
                 this.logger.warn(`Technology not found for proficiency update: ${id}`);
                 throw new Error('Technology not found');

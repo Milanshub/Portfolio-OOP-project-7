@@ -1,13 +1,13 @@
 // server/src/models/Admin.ts
 
 import { IAdmin } from '../types/entities';
-import { IAdminModel } from './interfaces/IAdminModel';
+import { IAdminModel } from '../models/interfaces/IAdminModel';
 import { supabase } from '../config/supabase';
 import bcrypt from 'bcrypt';
 import { Logger } from '../utils/logger';
 import { AppError } from '../middleware/errorMiddleware';
 
-export class Admin implements IAdminModel {
+export class AdminRepository implements IAdminModel {
     private logger = Logger.getInstance();
     private tableName = 'admins';
     private saltRounds = 10;

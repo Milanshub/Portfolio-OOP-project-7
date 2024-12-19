@@ -1,7 +1,5 @@
-// server/src/services/ProjectService.ts
-
 import { IProject, ICreateProject, IUpdateProject } from '../types/entities';
-import { Project } from '../models/Project';
+import { ProjectRepository } from '../respositories/ProjectRepository';
 import { Logger } from '../utils/logger';
 import { GitHubService } from './GitHubService';
 import { StorageService } from './StorageService';
@@ -10,7 +8,7 @@ import { AnalyticsService } from './AnalyticsService';
 import { AppError } from '../middleware/errorMiddleware';
 
 export class ProjectService {
-    private projectModel: Project;
+    private projectRepository: ProjectRepository;
     private githubService: GitHubService;
     private storageService: StorageService;
     private technologyService: TechnologyService;
@@ -18,7 +16,7 @@ export class ProjectService {
     private logger = Logger.getInstance();
 
     constructor() {
-        this.projectModel = new Project();
+        this.projectRepository = new ProjectRepository();
         this.githubService = new GitHubService();
         this.storageService = new StorageService();
         this.technologyService = new TechnologyService();
@@ -27,7 +25,7 @@ export class ProjectService {
 
     async getAllProjects(): Promise<IProject[]> {
         try {
-            const projects = await this.projectModel.findAll();
+            const projects = await this.projectRepository.findAll();
             this.logger.info('All projects retrieved successfully');
             return projects;
         } catch (error: any) {
@@ -38,7 +36,7 @@ export class ProjectService {
 
     async getFeaturedProjects(): Promise<IProject[]> {
         try {
-            const projects = await this.projectModel.findFeatured();
+            const projects = await this.projectRepository.findFeatured();
             this.logger.info('Featured projects retrieved successfully');
             return projects;
         } catch (error: any) {
@@ -49,7 +47,7 @@ export class ProjectService {
 
     async getProjectById(id: string): Promise<IProject> {
         try {
-            const project = await this.projectModel.findById(id);
+            const project = await this.projectRepository.findById(id);
             if (!project) {
                 this.logger.warn(`Project not found: ${id}`);
                 throw new AppError('Project not found', 404);
@@ -64,7 +62,7 @@ export class ProjectService {
 
     async createProject(projectData: ICreateProject): Promise<IProject> {
         try {
-            const project = await this.projectModel.create(projectData);
+            const project = await this.projectRepository.create(projectData);
 
             if (projectData.technologies) {
                 await this.associateTechnologies(project.id, projectData.technologies);
@@ -89,7 +87,7 @@ export class ProjectService {
 
     async updateProject(id: string, projectData: IUpdateProject): Promise<IProject> {
         try {
-            const updatedProject = await this.projectModel.update(id, projectData);
+            const updatedProject = await this.projectRepository.update(id, projectData);
             if (!updatedProject) {
                 this.logger.warn(`Project not found for update: ${id}`);
                 throw new AppError('Project not found', 404);
@@ -118,7 +116,7 @@ export class ProjectService {
 
     async deleteProject(id: string): Promise<boolean> {
         try {
-            const project = await this.projectModel.findById(id);
+            const project = await this.projectRepository.findById(id);
             if (!project) {
                 this.logger.warn(`Project not found for deletion: ${id}`);
                 throw new AppError('Project not found', 404);
@@ -132,7 +130,7 @@ export class ProjectService {
                 await this.storageService.deleteFile(image);
             }
 
-            const result = await this.projectModel.delete(id);
+            const result = await this.projectRepository.delete(id);
             if (result) {
                 await this.analytics.trackEvent('project_deleted', { projectId: id });
                 this.logger.info(`Project deleted successfully: ${id}`);
@@ -150,7 +148,7 @@ export class ProjectService {
                 technologyIds.map(techId => this.technologyService.getTechnologyById(techId))
             );
 
-            const updatedProject = await this.projectModel.updateTechnologies(projectId, technologyIds);
+            const updatedProject = await this.projectRepository.updateTechnologies(projectId, technologyIds);
             if (!updatedProject) {
                 throw new AppError('Failed to associate technologies', 500);
             }
@@ -171,7 +169,7 @@ export class ProjectService {
     async syncWithGitHub(projectId: string, repoUrl: string): Promise<IProject> {
         try {
             const repoMetadata = await this.githubService.getRepositoryMetadata(repoUrl);
-            const updatedProject = await this.projectModel.updateGitHubData(projectId, repoMetadata);
+            const updatedProject = await this.projectRepository.updateGitHubData(projectId, repoMetadata);
 
             if (!updatedProject) {
                 throw new AppError('Failed to sync with GitHub', 500);
@@ -204,7 +202,7 @@ export class ProjectService {
                 await this.storageService.deleteFile(project.thumbnail);
             }
 
-            const updatedProject = await this.projectModel.updateThumbnail(id, thumbnailUrl);
+            const updatedProject = await this.projectRepository.updateThumbnail(id, thumbnailUrl);
             if (!updatedProject) {
                 throw new AppError('Failed to update thumbnail', 500);
             }
@@ -235,7 +233,7 @@ export class ProjectService {
                 await this.storageService.deleteFile(image);
             }
 
-            const updatedProject = await this.projectModel.updateImages(id, imageUrls);
+            const updatedProject = await this.projectRepository.updateImages(id, imageUrls);
             if (!updatedProject) {
                 throw new AppError('Failed to update images', 500);
             }

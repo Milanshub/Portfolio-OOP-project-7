@@ -1,10 +1,10 @@
 import { ITechnology } from '../types/entities';
-import { ITechnologyModel } from './interfaces/ITechnologyModel';
+import { ITechnologyModel } from '../models/interfaces/ITechnologyModel';
 import { supabase } from '../config/supabase';
 import { Logger } from '../utils/logger';
 import { AppError } from '../middleware/errorMiddleware';
 
-export class Technology implements ITechnologyModel {
+export class TechnologyRepository implements ITechnologyModel {
     private logger = Logger.getInstance();
     private tableName = 'technologies';
 

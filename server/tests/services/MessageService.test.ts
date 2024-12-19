@@ -1,41 +1,54 @@
 import { MessageService } from '../../src/services/MessageService';
-import { Message } from '../../src/models/Message';
+import { MessageRepository } from '../../src/respositories/MessageRepository';
 import { Logger } from '../../src/utils/logger';
 import { emailValidator } from '../../src/utils/validators/emailValidator';
 import { mockMessage } from '../utils/mockHelpers';
 
 // Mock all dependencies
-jest.mock('../../src/models/Message');
+jest.mock('../../src/respositories/MessageRepository');
 jest.mock('../../src/utils/validators/emailValidator');
-
-// Mock Logger singleton
-const mockLogger = {
-    info: jest.fn(),
-    error: jest.fn(),
-    warn: jest.fn(),
-    debug: jest.fn()
-};
-
+jest.mock('resend', () => ({
+    Resend: jest.fn().mockImplementation(() => ({
+        emails: {
+            send: jest.fn().mockResolvedValue({ id: 'mock-email-id' })
+        }
+    }))
+}));
 jest.mock('../../src/utils/logger', () => ({
     Logger: {
-        getInstance: () => mockLogger
+        getInstance: jest.fn().mockReturnValue({
+            info: jest.fn(),
+            error: jest.fn(),
+            warn: jest.fn(),
+            debug: jest.fn()
+        })
     }
 }));
 
+// Mock environment variables
+process.env.RESEND_API_KEY = 'mock-resend-key';
+
 describe('MessageService', () => {
     let messageService: MessageService;
+    let mockLogger: any;
 
     beforeEach(() => {
         jest.clearAllMocks();
+        process.env.ADMIN_EMAIL = 'admin@test.com';
+        mockLogger = Logger.getInstance();
         messageService = new MessageService();
         
         // Setup email validator mock
         (emailValidator.isValidEmail as jest.Mock).mockReturnValue(true);
     });
 
+    afterEach(() => {
+        delete process.env.ADMIN_EMAIL;
+    });
+
     describe('getAllMessages', () => {
         it('should get all messages successfully', async () => {
-            (Message.prototype.findAll as jest.Mock).mockResolvedValue([mockMessage]);
+            (MessageRepository.prototype.findAll as jest.Mock).mockResolvedValue([mockMessage]);
 
             const result = await messageService.getAllMessages();
 
@@ -46,7 +59,7 @@ describe('MessageService', () => {
         });
 
         it('should handle errors when getting messages', async () => {
-            (Message.prototype.findAll as jest.Mock).mockRejectedValue(new Error('Database error'));
+            (MessageRepository.prototype.findAll as jest.Mock).mockRejectedValue(new Error('Database error'));
 
             await expect(messageService.getAllMessages())
                 .rejects.toThrow('Failed to get messages');
@@ -56,7 +69,7 @@ describe('MessageService', () => {
 
     describe('getUnreadMessages', () => {
         it('should get unread messages successfully', async () => {
-            (Message.prototype.findAllUnread as jest.Mock).mockResolvedValue([mockMessage]);
+            (MessageRepository.prototype.findAllUnread as jest.Mock).mockResolvedValue([mockMessage]);
 
             const result = await messageService.getUnreadMessages();
 
@@ -67,7 +80,7 @@ describe('MessageService', () => {
         });
 
         it('should handle errors when getting unread messages', async () => {
-            (Message.prototype.findAllUnread as jest.Mock).mockRejectedValue(new Error('Database error'));
+            (MessageRepository.prototype.findAllUnread as jest.Mock).mockRejectedValue(new Error('Database error'));
 
             await expect(messageService.getUnreadMessages())
                 .rejects.toThrow('Failed to get unread messages');
@@ -77,7 +90,7 @@ describe('MessageService', () => {
 
     describe('getUnreadCount', () => {
         it('should get unread count successfully', async () => {
-            (Message.prototype.getUnreadCount as jest.Mock).mockResolvedValue(5);
+            (MessageRepository.prototype.getUnreadCount as jest.Mock).mockResolvedValue(5);
 
             const result = await messageService.getUnreadCount();
 
@@ -88,7 +101,7 @@ describe('MessageService', () => {
         });
 
         it('should handle errors when getting unread count', async () => {
-            (Message.prototype.getUnreadCount as jest.Mock).mockRejectedValue(new Error('Database error'));
+            (MessageRepository.prototype.getUnreadCount as jest.Mock).mockRejectedValue(new Error('Database error'));
 
             await expect(messageService.getUnreadCount())
                 .rejects.toThrow('Failed to get unread count');
@@ -105,7 +118,7 @@ describe('MessageService', () => {
         };
 
         it('should create message successfully', async () => {
-            (Message.prototype.create as jest.Mock).mockResolvedValue(mockMessage);
+            (MessageRepository.prototype.create as jest.Mock).mockResolvedValue(mockMessage);
 
             const result = await messageService.createMessage(validMessageData);
 
@@ -146,11 +159,23 @@ describe('MessageService', () => {
                 expect.stringContaining('missing required fields')
             );
         });
+
+        it.skip('should handle email notification failure', async () => {
+            const { Resend } = require('resend');
+            const mockResendInstance = new Resend();
+            mockResendInstance.emails.send.mockRejectedValueOnce(new Error('Email sending failed'));
+            
+            (MessageRepository.prototype.create as jest.Mock).mockResolvedValue(mockMessage);
+
+            await expect(messageService.createMessage(validMessageData))
+                .rejects.toThrow('Failed to create message: Email sending failed');
+            expect(mockLogger.error).toHaveBeenCalled();
+        });
     });
 
     describe('markAsRead', () => {
         it('should mark message as read successfully', async () => {
-            (Message.prototype.markAsRead as jest.Mock).mockResolvedValue(mockMessage);
+            (MessageRepository.prototype.markAsRead as jest.Mock).mockResolvedValue(mockMessage);
 
             const result = await messageService.markAsRead(mockMessage.id);
 
@@ -161,7 +186,7 @@ describe('MessageService', () => {
         });
 
         it('should throw error for non-existent message', async () => {
-            (Message.prototype.markAsRead as jest.Mock).mockResolvedValue(null);
+            (MessageRepository.prototype.markAsRead as jest.Mock).mockResolvedValue(null);
 
             await expect(messageService.markAsRead('999'))
                 .rejects.toThrow('Message not found');
@@ -173,8 +198,8 @@ describe('MessageService', () => {
 
     describe('deleteMessage', () => {
         it('should delete message successfully', async () => {
-            (Message.prototype.findById as jest.Mock).mockResolvedValue(mockMessage);
-            (Message.prototype.delete as jest.Mock).mockResolvedValue(true);
+            (MessageRepository.prototype.findById as jest.Mock).mockResolvedValue(mockMessage);
+            (MessageRepository.prototype.delete as jest.Mock).mockResolvedValue(true);
 
             const result = await messageService.deleteMessage(mockMessage.id);
 
@@ -185,7 +210,7 @@ describe('MessageService', () => {
         });
 
         it('should throw error for non-existent message', async () => {
-            (Message.prototype.findById as jest.Mock).mockResolvedValue(null);
+            (MessageRepository.prototype.findById as jest.Mock).mockResolvedValue(null);
 
             await expect(messageService.deleteMessage('999'))
                 .rejects.toThrow('Message not found');

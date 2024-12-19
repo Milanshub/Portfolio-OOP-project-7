@@ -1,24 +1,24 @@
 // server/src/services/MessageService.ts
 
 import { IMessage, ICreateMessage } from '../types/entities';
-import { Message } from '../models/Message';
+import { MessageRepository } from '../respositories/MessageRepository';
 import { Logger } from '../utils/logger';
 import { emailValidator } from '../utils/validators/emailValidator';
 import { sendEmail } from '../utils/emailSender';
 import { AppError } from '../middleware/errorMiddleware';
 
 export class MessageService {
-    private messageModel: Message;
+    private messageRepository: MessageRepository;
     private logger = Logger.getInstance();
     private readonly adminEmail = process.env.ADMIN_EMAIL;
 
     constructor() {
-        this.messageModel = new Message();
+        this.messageRepository = new MessageRepository();
     }
 
     async getAllMessages(): Promise<IMessage[]> {
         try {
-            const messages = await this.messageModel.findAll();
+            const messages = await this.messageRepository.findAll();
             this.logger.info('All messages retrieved successfully');
             return messages;
         } catch (error: any) {
@@ -29,7 +29,7 @@ export class MessageService {
 
     async getUnreadMessages(): Promise<IMessage[]> {
         try {
-            const messages = await this.messageModel.findAllUnread();
+            const messages = await this.messageRepository.findAllUnread();
             this.logger.info('Unread messages retrieved successfully');
             return messages;
         } catch (error: any) {
@@ -40,7 +40,7 @@ export class MessageService {
 
     async getUnreadCount(): Promise<number> {
         try {
-            const count = await this.messageModel.getUnreadCount();
+            const count = await this.messageRepository.getUnreadCount();
             this.logger.debug(`Current unread message count: ${count}`);
             return count;
         } catch (error: any) {
@@ -63,7 +63,7 @@ export class MessageService {
                 throw new AppError('Name and message are required', 400);
             }
 
-            const message = await this.messageModel.create(messageData);
+            const message = await this.messageRepository.create(messageData);
 
             // Send email notification
             await this.sendEmailNotification(message);
@@ -78,7 +78,7 @@ export class MessageService {
 
     async markAsRead(id: string): Promise<IMessage> {
         try {
-            const message = await this.messageModel.markAsRead(id);
+            const message = await this.messageRepository.markAsRead(id);
             if (!message) {
                 this.logger.warn(`Attempted to mark non-existent message as read: ${id}`);
                 throw new AppError('Message not found', 404);
@@ -93,13 +93,13 @@ export class MessageService {
 
     async deleteMessage(id: string): Promise<boolean> {
         try {
-            const message = await this.messageModel.findById(id);
+            const message = await this.messageRepository.findById(id);
             if (!message) {
                 this.logger.warn(`Attempted to delete non-existent message: ${id}`);
                 throw new AppError('Message not found', 404);
             }
 
-            const result = await this.messageModel.delete(id);
+            const result = await this.messageRepository.delete(id);
             if (result) {
                 this.logger.info(`Message deleted successfully: ${id}`);
             }

@@ -1,10 +1,10 @@
 import { IMessage } from '../types/entities';
-import { IMessageModel } from './interfaces/IMessageModel';
+import { IMessageModel } from '../models/interfaces/IMessageModel';
 import { supabase } from '../config/supabase';
 import { Logger } from '../utils/logger';
 import { AppError } from '../middleware/errorMiddleware';
 
-export class Message implements IMessageModel {
+export class MessageRepository implements IMessageModel {
     private logger = Logger.getInstance();
     private tableName = 'messages';
 

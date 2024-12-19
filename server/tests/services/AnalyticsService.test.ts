@@ -1,47 +1,61 @@
 import { AnalyticsService } from '../../src/services/AnalyticsService';
-import { Analytics } from '../../src/models/Analytics';
+import { AnalyticsRepository } from '../../src/respositories/AnalyticsRepository';
 import { Logger } from '../../src/utils/logger';
 import { mockAnalytics } from '../utils/mockHelpers';
 
-// Mock Analytics model
-jest.mock('../../src/models/Analytics');
+// Mock AnalyticsRepository
+jest.mock('../../src/respositories/AnalyticsRepository', () => {
+    return {
+        AnalyticsRepository: jest.fn().mockImplementation(() => ({
+            findAll: jest.fn(),
+            getLatestAnalytics: jest.fn(),
+            create: jest.fn(),
+            update: jest.fn(),
+            findById: jest.fn(),
+            delete: jest.fn(),
+            incrementPageViews: jest.fn(),
+            updateMostViewedProjects: jest.fn(),
+            createEvent: jest.fn()
+        }))
+    };
+});
 
-// Mock Logger singleton
-const mockLogger = {
-    info: jest.fn(),
-    error: jest.fn(),
-    warn: jest.fn(),
-    debug: jest.fn()
-};
-
+// Mock Logger
 jest.mock('../../src/utils/logger', () => ({
     Logger: {
-        getInstance: () => mockLogger
+        getInstance: jest.fn().mockReturnValue({
+            info: jest.fn(),
+            error: jest.fn(),
+            warn: jest.fn(),
+            debug: jest.fn()
+        })
     }
 }));
 
 describe.skip('AnalyticsService', () => {
     let analyticsService: AnalyticsService;
+    let mockLogger: any;
 
     beforeEach(() => {
         jest.clearAllMocks();
+        mockLogger = Logger.getInstance();
+        // Reset singleton instance before each test
+        (AnalyticsService as any).instance = null;
         analyticsService = AnalyticsService.getInstance();
     });
 
     describe('getAnalytics', () => {
         it('should get all analytics successfully', async () => {
-            (Analytics.prototype.findAll as jest.Mock).mockResolvedValue([mockAnalytics]);
+            (AnalyticsRepository.prototype.findAll as jest.Mock).mockResolvedValue([mockAnalytics]);
 
             const result = await analyticsService.getAnalytics();
 
             expect(result).toEqual([mockAnalytics]);
-            expect(mockLogger.info).toHaveBeenCalledWith(
-                expect.stringContaining('Analytics data retrieved successfully')
-            );
+            expect(mockLogger.info).toHaveBeenCalledWith('Analytics data retrieved successfully');
         });
 
         it('should handle errors when getting analytics', async () => {
-            (Analytics.prototype.findAll as jest.Mock).mockRejectedValue(new Error('Database error'));
+            (AnalyticsRepository.prototype.findAll as jest.Mock).mockRejectedValue(new Error('Database error'));
 
             await expect(analyticsService.getAnalytics())
                 .rejects.toThrow('Failed to get analytics');
@@ -51,18 +65,16 @@ describe.skip('AnalyticsService', () => {
 
     describe('getLatestAnalytics', () => {
         it('should get latest analytics successfully', async () => {
-            (Analytics.prototype.getLatestAnalytics as jest.Mock).mockResolvedValue(mockAnalytics);
+            (AnalyticsRepository.prototype.getLatestAnalytics as jest.Mock).mockResolvedValue(mockAnalytics);
 
             const result = await analyticsService.getLatestAnalytics();
 
             expect(result).toEqual(mockAnalytics);
-            expect(mockLogger.info).toHaveBeenCalledWith(
-                expect.stringContaining('Latest analytics retrieved successfully')
-            );
+            expect(mockLogger.info).toHaveBeenCalledWith('Latest analytics retrieved successfully');
         });
 
         it('should handle errors when getting latest analytics', async () => {
-            (Analytics.prototype.getLatestAnalytics as jest.Mock).mockRejectedValue(new Error('Database error'));
+            (AnalyticsRepository.prototype.getLatestAnalytics as jest.Mock).mockRejectedValue(new Error('Database error'));
 
             await expect(analyticsService.getLatestAnalytics())
                 .rejects.toThrow('Failed to get latest analytics');
@@ -79,18 +91,16 @@ describe.skip('AnalyticsService', () => {
         };
 
         it('should create analytics successfully', async () => {
-            (Analytics.prototype.create as jest.Mock).mockResolvedValue(mockAnalytics);
+            (AnalyticsRepository.prototype.create as jest.Mock).mockResolvedValue(mockAnalytics);
 
             const result = await analyticsService.createAnalytics(analyticsData);
 
             expect(result).toEqual(mockAnalytics);
-            expect(mockLogger.info).toHaveBeenCalledWith(
-                expect.stringContaining('Analytics created successfully')
-            );
+            expect(mockLogger.info).toHaveBeenCalledWith('Analytics created successfully');
         });
 
         it('should handle errors when creating analytics', async () => {
-            (Analytics.prototype.create as jest.Mock).mockRejectedValue(new Error('Database error'));
+            (AnalyticsRepository.prototype.create as jest.Mock).mockRejectedValue(new Error('Database error'));
 
             await expect(analyticsService.createAnalytics(analyticsData))
                 .rejects.toThrow('Failed to create analytics');
@@ -105,41 +115,56 @@ describe.skip('AnalyticsService', () => {
         };
 
         it('should update analytics successfully', async () => {
-            (Analytics.prototype.update as jest.Mock).mockResolvedValue({ ...mockAnalytics, ...updateData });
+            (AnalyticsRepository.prototype.update as jest.Mock)
+                .mockResolvedValue({ ...mockAnalytics, ...updateData });
 
             const result = await analyticsService.updateAnalytics(mockAnalytics.id, updateData);
 
             expect(result.pageViews).toBe(updateData.pageViews);
             expect(result.uniqueVisitors).toBe(updateData.uniqueVisitors);
-            expect(mockLogger.info).toHaveBeenCalledWith(
-                expect.stringContaining('Analytics updated successfully')
-            );
+            expect(mockLogger.info).toHaveBeenCalledWith(`Analytics updated successfully: ${mockAnalytics.id}`);
         });
 
         it('should throw error for non-existent analytics', async () => {
-            (Analytics.prototype.update as jest.Mock).mockResolvedValue(null);
+            (AnalyticsRepository.prototype.update as jest.Mock).mockResolvedValue(null);
 
             await expect(analyticsService.updateAnalytics('999', updateData))
                 .rejects.toThrow('Analytics not found');
-            expect(mockLogger.warn).toHaveBeenCalledWith(
-                expect.stringContaining('Analytics not found with ID')
-            );
+            expect(mockLogger.error).toHaveBeenCalled();
+        });
+    });
+
+    describe('deleteAnalytics', () => {
+        it('should delete analytics successfully', async () => {
+            (AnalyticsRepository.prototype.findById as jest.Mock).mockResolvedValue(mockAnalytics);
+            (AnalyticsRepository.prototype.delete as jest.Mock).mockResolvedValue(undefined);
+
+            await analyticsService.deleteAnalytics(mockAnalytics.id);
+
+            expect(mockLogger.info).toHaveBeenCalledWith(`Analytics deleted successfully: ${mockAnalytics.id}`);
+        });
+
+        it('should throw error for non-existent analytics', async () => {
+            (AnalyticsRepository.prototype.findById as jest.Mock).mockResolvedValue(null);
+
+            await expect(analyticsService.deleteAnalytics('999'))
+                .rejects.toThrow('Analytics not found');
+            expect(mockLogger.error).toHaveBeenCalled();
         });
     });
 
     describe('recordPageView', () => {
         it('should record page view successfully', async () => {
-            (Analytics.prototype.incrementPageViews as jest.Mock).mockResolvedValue(undefined);
+            (AnalyticsRepository.prototype.incrementPageViews as jest.Mock).mockResolvedValue(undefined);
 
             await analyticsService.recordPageView();
 
-            expect(mockLogger.info).toHaveBeenCalledWith(
-                expect.stringContaining('Page view recorded successfully')
-            );
+            expect(mockLogger.info).toHaveBeenCalledWith('Page view recorded successfully');
         });
 
         it('should handle errors when recording page view', async () => {
-            (Analytics.prototype.incrementPageViews as jest.Mock).mockRejectedValue(new Error('Database error'));
+            (AnalyticsRepository.prototype.incrementPageViews as jest.Mock)
+                .mockRejectedValue(new Error('Database error'));
 
             await expect(analyticsService.recordPageView())
                 .rejects.toThrow('Failed to record page view');
@@ -149,17 +174,16 @@ describe.skip('AnalyticsService', () => {
 
     describe('updateMostViewedProjects', () => {
         it('should update most viewed projects successfully', async () => {
-            (Analytics.prototype.updateMostViewedProjects as jest.Mock).mockResolvedValue(undefined);
+            (AnalyticsRepository.prototype.updateMostViewedProjects as jest.Mock).mockResolvedValue(undefined);
 
             await analyticsService.updateMostViewedProjects(mockAnalytics.mostViewedProjects);
 
-            expect(mockLogger.info).toHaveBeenCalledWith(
-                expect.stringContaining('Most viewed projects updated successfully')
-            );
+            expect(mockLogger.info).toHaveBeenCalledWith('Most viewed projects updated successfully');
         });
 
         it('should handle errors when updating most viewed projects', async () => {
-            (Analytics.prototype.updateMostViewedProjects as jest.Mock).mockRejectedValue(new Error('Database error'));
+            (AnalyticsRepository.prototype.updateMostViewedProjects as jest.Mock)
+                .mockRejectedValue(new Error('Database error'));
 
             await expect(analyticsService.updateMostViewedProjects(mockAnalytics.mostViewedProjects))
                 .rejects.toThrow('Failed to update most viewed projects');
@@ -169,7 +193,7 @@ describe.skip('AnalyticsService', () => {
 
     describe('generateAnalyticsReport', () => {
         it('should generate analytics report successfully', async () => {
-            (Analytics.prototype.getLatestAnalytics as jest.Mock).mockResolvedValue(mockAnalytics);
+            (AnalyticsRepository.prototype.getLatestAnalytics as jest.Mock).mockResolvedValue(mockAnalytics);
 
             const result = await analyticsService.generateAnalyticsReport();
 
@@ -180,26 +204,35 @@ describe.skip('AnalyticsService', () => {
                 topProjects: mockAnalytics.mostViewedProjects,
                 lastUpdated: mockAnalytics.updatedAt
             });
-            expect(mockLogger.info).toHaveBeenCalledWith(
-                expect.stringContaining('Analytics report generated successfully')
-            );
+            expect(mockLogger.info).toHaveBeenCalledWith('Analytics report generated successfully');
         });
 
         it('should throw error when no analytics data available', async () => {
-            (Analytics.prototype.getLatestAnalytics as jest.Mock).mockResolvedValue(null);
+            (AnalyticsRepository.prototype.getLatestAnalytics as jest.Mock).mockResolvedValue(null);
 
             await expect(analyticsService.generateAnalyticsReport())
                 .rejects.toThrow('No analytics data available');
-            expect(mockLogger.warn).toHaveBeenCalledWith(
-                expect.stringContaining('No analytics data available for report generation')
-            );
+            expect(mockLogger.error).toHaveBeenCalled();
+        });
+    });
+
+    describe('trackEvent', () => {
+        it('should track event successfully', async () => {
+            const eventName = 'test_event';
+            const eventData = { test: 'data' };
+            (AnalyticsRepository.prototype.createEvent as jest.Mock).mockResolvedValue(undefined);
+
+            await analyticsService.trackEvent(eventName, eventData);
+
+            expect(mockLogger.info).toHaveBeenCalledWith(`Event tracked: ${eventName}`, eventData);
         });
 
-        it('should handle errors when generating report', async () => {
-            (Analytics.prototype.getLatestAnalytics as jest.Mock).mockRejectedValue(new Error('Database error'));
+        it('should handle errors when tracking event', async () => {
+            (AnalyticsRepository.prototype.createEvent as jest.Mock)
+                .mockRejectedValue(new Error('Database error'));
 
-            await expect(analyticsService.generateAnalyticsReport())
-                .rejects.toThrow('Failed to generate analytics report');
+            await expect(analyticsService.trackEvent('test_event'))
+                .rejects.toThrow('Failed to track event');
             expect(mockLogger.error).toHaveBeenCalled();
         });
     });

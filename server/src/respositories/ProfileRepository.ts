@@ -1,10 +1,10 @@
 import { IProfile } from '../types/entities';
-import { IProfileModel } from './interfaces/IProfileModel';
+import { IProfileModel } from '../models/interfaces/IProfileModel';
 import { supabase } from '../config/supabase';
 import { Logger } from '../utils/logger';
 import { AppError } from '../middleware/errorMiddleware';
 
-export class Profile implements IProfileModel {
+export class ProfileRepository implements IProfileModel {
     private logger = Logger.getInstance();
     private tableName = 'profiles';
 

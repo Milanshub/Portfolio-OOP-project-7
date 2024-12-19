@@ -1,4 +1,4 @@
-import { Message } from '../../src/models/Message';
+import { MessageRepository } from '../../src/respositories/MessageRepository';
 import { supabase } from '../../src/config/supabase';
 import { AppError } from '../../src/middleware/errorMiddleware';
 import { mockMessage } from '../utils/mockHelpers';
@@ -51,11 +51,11 @@ jest.mock('../../src/utils/logger', () => ({
 }));
 
 describe('Message Model', () => {
-    let messageModel: Message;
+    let messageModel: MessageRepository;
 
     beforeEach(() => {
         jest.clearAllMocks();
-        messageModel = new Message();
+        messageModel = new MessageRepository();
     });
 
     describe('CRUD Operations', () => {

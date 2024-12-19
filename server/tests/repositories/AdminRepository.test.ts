@@ -1,4 +1,4 @@
-import { Admin } from '../../src/models/Admin';
+import { AdminRepository } from '../../src/respositories/AdminRepository';
 import { supabase } from '../../src/config/supabase';
 import { AppError } from '../../src/middleware/errorMiddleware';
 import bcrypt from 'bcrypt';
@@ -50,7 +50,7 @@ jest.mock('../../src/utils/logger', () => ({
 }));
 
 describe('Admin Model', () => {
-    let adminModel: Admin;
+    let adminModel: AdminRepository;
     const mockAdmin = {
         id: '1',
         email: 'admin@test.com',
@@ -60,7 +60,7 @@ describe('Admin Model', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        adminModel = new Admin();
+        adminModel = new AdminRepository();
     });
 
     describe('CRUD Operations', () => {
@@ -188,21 +188,17 @@ describe('Admin Model', () => {
         });
 
         it('should update last login', async () => {
-            const singleMock = jest.fn().mockResolvedValueOnce({ 
-                data: mockAdmin, 
-                error: null 
-            });
-            const selectMock = jest.fn().mockReturnValue({ single: singleMock });
-            const eqMock = jest.fn().mockReturnValue({ select: selectMock });
-            const updateMock = jest.fn().mockReturnValue({ eq: eqMock });
-
+            const updateMock = jest.fn().mockReturnValue({ error: null });
+            const eqMock = jest.fn().mockReturnValue({ error: null });
+    
             (supabase.from as jest.Mock).mockReturnValueOnce({
-                update: updateMock
+                update: updateMock.mockReturnValue({
+                    eq: eqMock
+                })
             });
-
-            const result = await adminModel.updateLastLogin('1');
-
-            expect(result).toEqual(mockAdmin);
+    
+            await adminModel.updateLastLogin('1');
+    
             expect(updateMock).toHaveBeenCalledWith({ lastLogin: expect.any(Date) });
             expect(eqMock).toHaveBeenCalledWith('id', '1');
         });

@@ -41,6 +41,8 @@ describe('Admin Routes', () => {
             expect(response.status).toBe(200);
             expect(response.body).toHaveProperty('token');
         });
+
+        
     });
 
     describe('Protected Routes', () => {

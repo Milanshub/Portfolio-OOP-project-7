@@ -1,15 +1,15 @@
 import { IAnalytics, ICreateAnalytics, IUpdateAnalytics } from '../types/entities';
-import { Analytics } from '../models/Analytics';
+import { AnalyticsRepository } from '../respositories/AnalyticsRepository';
 import { Logger } from '../utils/logger';
 import { AppError } from '../middleware/errorMiddleware';
 
 export class AnalyticsService {
     private static instance: AnalyticsService;
-    private analyticsModel: Analytics;
+    private analyticsRepository: AnalyticsRepository;
     private logger = Logger.getInstance();
 
     private constructor() {
-        this.analyticsModel = new Analytics();
+        this.analyticsRepository = new AnalyticsRepository();
     }
 
     public static getInstance(): AnalyticsService {
@@ -21,7 +21,7 @@ export class AnalyticsService {
 
     async getAnalytics(): Promise<IAnalytics[]> {
         try {
-            const analytics = await this.analyticsModel.findAll();
+            const analytics = await this.analyticsRepository.findAll();
             this.logger.info('Analytics data retrieved successfully');
             return analytics;
         } catch (error: any) {
@@ -32,7 +32,7 @@ export class AnalyticsService {
 
     async getLatestAnalytics(): Promise<IAnalytics | null> {
         try {
-            const analytics = await this.analyticsModel.getLatestAnalytics();
+            const analytics = await this.analyticsRepository.getLatestAnalytics();
             this.logger.info('Latest analytics retrieved successfully');
             return analytics;
         } catch (error: any) {
@@ -43,7 +43,7 @@ export class AnalyticsService {
 
     async createAnalytics(analyticsData: ICreateAnalytics): Promise<IAnalytics> {
         try {
-            const analytics = await this.analyticsModel.create(analyticsData);
+            const analytics = await this.analyticsRepository.create(analyticsData);
             this.logger.info('Analytics created successfully');
             return analytics;
         } catch (error: any) {
@@ -54,7 +54,7 @@ export class AnalyticsService {
 
     async updateAnalytics(id: string, analyticsData: IUpdateAnalytics): Promise<IAnalytics> {
         try {
-            const updatedAnalytics = await this.analyticsModel.update(id, analyticsData);
+            const updatedAnalytics = await this.analyticsRepository.update(id, analyticsData);
             if (!updatedAnalytics) {
                 throw new AppError('Analytics not found', 404);
             }
@@ -68,12 +68,12 @@ export class AnalyticsService {
 
     async deleteAnalytics(id: string): Promise<void> {
         try {
-            const analytics = await this.analyticsModel.findById(id);
+            const analytics = await this.analyticsRepository.findById(id);
             if (!analytics) {
                 throw new AppError('Analytics not found', 404);
             }
 
-            await this.analyticsModel.delete(id);
+            await this.analyticsRepository.delete(id);
             this.logger.info(`Analytics deleted successfully: ${id}`);
         } catch (error: any) {
             this.logger.error('Failed to delete analytics:', error);
@@ -83,7 +83,7 @@ export class AnalyticsService {
 
     async recordPageView(): Promise<void> {
         try {
-            await this.analyticsModel.incrementPageViews();
+            await this.analyticsRepository.incrementPageViews();
             this.logger.info('Page view recorded successfully');
         } catch (error: any) {
             this.logger.error('Failed to record page view:', error);
@@ -93,7 +93,7 @@ export class AnalyticsService {
 
     async updateMostViewedProjects(projectIds: string[]): Promise<void> {
         try {
-            await this.analyticsModel.updateMostViewedProjects(projectIds);
+            await this.analyticsRepository.updateMostViewedProjects(projectIds);
             this.logger.info('Most viewed projects updated successfully');
         } catch (error: any) {
             this.logger.error('Failed to update most viewed projects:', error);
@@ -103,7 +103,7 @@ export class AnalyticsService {
 
     async generateAnalyticsReport(): Promise<any> {
         try {
-            const latest = await this.analyticsModel.getLatestAnalytics();
+            const latest = await this.analyticsRepository.getLatestAnalytics();
             if (!latest) {
                 throw new AppError('No analytics data available', 404);
             }
@@ -126,7 +126,7 @@ export class AnalyticsService {
 
     async trackEvent(eventName: string, data: any = {}): Promise<void> {
         try {
-            await this.analyticsModel.createEvent({
+            await this.analyticsRepository.createEvent({
                 name: eventName,
                 data,
                 timestamp: new Date()

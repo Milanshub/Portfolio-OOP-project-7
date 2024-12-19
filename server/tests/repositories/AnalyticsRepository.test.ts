@@ -1,4 +1,4 @@
-import { Analytics } from '../../src/models/Analytics';
+import { AnalyticsRepository } from '../../src/respositories/AnalyticsRepository';
 import { supabase } from '../../src/config/supabase';
 import { AppError } from '../../src/middleware/errorMiddleware';
 import { mockAnalytics } from '../utils/mockHelpers';
@@ -49,11 +49,11 @@ jest.mock('../../src/utils/logger', () => ({
 }));
 
 describe('Analytics Model', () => {
-    let analyticsModel: Analytics;
+    let analyticsModel: AnalyticsRepository;
 
     beforeEach(() => {
         jest.clearAllMocks();
-        analyticsModel = new Analytics();
+        analyticsModel = new AnalyticsRepository();
     });
 
     describe('CRUD Operations', () => {

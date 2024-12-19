@@ -18,7 +18,10 @@ jest.mock('../../src/controllers/AnalyticsController', () => {
             getLatestAnalytics: jest.fn((req, res) => res.json({})),
             generateAnalyticsReport: jest.fn((req, res) => res.json({})),
             createAnalytics: jest.fn((req, res) => res.status(201).json({})),
-            updateAnalytics: jest.fn((req, res) => res.json({}))
+            updateAnalytics: jest.fn((req, res) => res.json({})),
+            deleteAnalytics: jest.fn((req, res) => res.status(204).send()),
+            recordPageView: jest.fn((req, res) => res.json({})),
+            updateMostViewedProjects: jest.fn((req, res) => res.json({}))
         }))
     };
 });
@@ -31,6 +34,16 @@ describe('Analytics Routes', () => {
         app = express();
         app.use(express.json());
         app.use('/analytics', analyticsRoutes);
+    });
+
+    describe('Public Routes', () => {
+        it('POST /pageview should record page view', async () => {
+            const response = await request(app)
+                .post('/analytics/pageview')
+                .send({ page: '/home' });
+
+            expect(response.status).toBe(200);
+        });
     });
 
     describe('Protected Routes', () => {
@@ -75,6 +88,25 @@ describe('Analytics Routes', () => {
             const response = await request(app)
                 .put('/analytics/1')
                 .send({ visits: 150 });
+
+            expect(response.status).toBe(200);
+            expect(authenticate).toHaveBeenCalled();
+            expect(requireAdmin).toHaveBeenCalled();
+        });
+
+        it('DELETE /:id should delete analytics', async () => {
+            const response = await request(app)
+                .delete('/analytics/1');
+
+            expect(response.status).toBe(204);
+            expect(authenticate).toHaveBeenCalled();
+            expect(requireAdmin).toHaveBeenCalled();
+        });
+
+        it('PUT /most-viewed-projects should update most viewed projects', async () => {
+            const response = await request(app)
+                .put('/analytics/most-viewed-projects')
+                .send({ projectIds: ['1', '2', '3'] });
 
             expect(response.status).toBe(200);
             expect(authenticate).toHaveBeenCalled();

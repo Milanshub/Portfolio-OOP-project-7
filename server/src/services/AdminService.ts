@@ -1,32 +1,32 @@
 // server/src/services/AdminService.ts
 
 import { IAdmin, ICreateAdmin, IUpdateAdmin } from '../types/entities';
-import { Admin } from '../models/Admin';
+import { AdminRepository } from '../respositories/AdminRepository';
 import { Logger } from '../utils/logger';
 import { emailValidator } from '../utils/validators/emailValidator';
 import { AppError } from '../middleware/errorMiddleware';
 import { AnalyticsService } from './AnalyticsService';
 
 export class AdminService {
-    private adminModel: Admin;
+    private adminRepository: AdminRepository;
     private logger = Logger.getInstance();
     private analytics: AnalyticsService;
 
     constructor() {
-        this.adminModel = new Admin();
+        this.adminRepository = new AdminRepository();
         this.analytics = AnalyticsService.getInstance();
     }
 
     async validateCredentials(email: string, password: string): Promise<IAdmin> {
         try {
-            const admin = await this.adminModel.findByEmail(email);
+            const admin = await this.adminRepository.findByEmail(email);
             if (!admin) {
                 await this.analytics.trackEvent('failed_login_attempt', { email });
                 this.logger.warn(`Failed login attempt for email: ${email}`);
                 throw new AppError('Invalid credentials', 401);
             }
 
-            const isValidPassword = await this.adminModel.validatePassword(
+            const isValidPassword = await this.adminRepository.validatePassword(
                 password,
                 admin.password
             );
@@ -37,7 +37,7 @@ export class AdminService {
                 throw new AppError('Invalid credentials', 401);
             }
 
-            await this.adminModel.updateLastLogin(admin.id);
+            await this.adminRepository.updateLastLogin(admin.id);
             await this.analytics.trackEvent('successful_login', { adminId: admin.id });
             this.logger.info(`Admin credentials validated: ${email}`);
             return admin;
@@ -53,13 +53,13 @@ export class AdminService {
                 throw new AppError('Invalid email format', 400);
             }
 
-            const existingAdmin = await this.adminModel.findByEmail(adminData.email);
+            const existingAdmin = await this.adminRepository.findByEmail(adminData.email);
             if (existingAdmin) {
                 this.logger.warn(`Attempt to create admin with existing email: ${adminData.email}`);
                 throw new AppError('Email already registered', 409);
             }
 
-            const admin = await this.adminModel.create(adminData);
+            const admin = await this.adminRepository.create(adminData);
             await this.analytics.trackEvent('admin_created', { adminId: admin.id });
             this.logger.info(`New admin created: ${admin.email}`);
             return admin;
@@ -71,7 +71,7 @@ export class AdminService {
 
     async getAdminById(id: string): Promise<IAdmin> {
         try {
-            const admin = await this.adminModel.findById(id);
+            const admin = await this.adminRepository.findById(id);
             if (!admin) {
                 this.logger.warn(`Admin not found with ID: ${id}`);
                 throw new AppError('Admin not found', 404);
@@ -86,7 +86,7 @@ export class AdminService {
 
     async getAdminByEmail(email: string): Promise<IAdmin> {
         try {
-            const admin = await this.adminModel.findByEmail(email);
+            const admin = await this.adminRepository.findByEmail(email);
             if (!admin) {
                 this.logger.warn(`Admin not found with email: ${email}`);
                 throw new AppError('Admin not found', 404);
@@ -105,13 +105,13 @@ export class AdminService {
             }
 
             if (adminData.email) {
-                const existingAdmin = await this.adminModel.findByEmail(adminData.email);
+                const existingAdmin = await this.adminRepository.findByEmail(adminData.email);
                 if (existingAdmin && existingAdmin.id !== id) {
                     throw new AppError('Email already in use', 409);
                 }
             }
 
-            const updatedAdmin = await this.adminModel.update(id, adminData);
+            const updatedAdmin = await this.adminRepository.update(id, adminData);
             if (!updatedAdmin) {
                 this.logger.warn(`Admin not found for update with ID: ${id}`);
                 throw new AppError('Admin not found', 404);
@@ -128,13 +128,13 @@ export class AdminService {
 
     async deleteAdmin(id: string): Promise<boolean> {
         try {
-            const admin = await this.adminModel.findById(id);
+            const admin = await this.adminRepository.findById(id);
             if (!admin) {
                 this.logger.warn(`Admin not found for deletion with ID: ${id}`);
                 throw new AppError('Admin not found', 404);
             }
 
-            const result = await this.adminModel.delete(id);
+            const result = await this.adminRepository.delete(id);
             if (result) {
                 await this.analytics.trackEvent('admin_deleted', { adminId: id });
                 this.logger.info(`Admin deleted successfully: ${id}`);
@@ -150,7 +150,7 @@ export class AdminService {
         try {
             const admin = await this.getAdminById(id);
             
-            const isValidPassword = await this.adminModel.validatePassword(
+            const isValidPassword = await this.adminRepository.validatePassword(
                 currentPassword,
                 admin.password
             );
@@ -160,7 +160,7 @@ export class AdminService {
                 throw new AppError('Current password is incorrect', 401);
             }
 
-            await this.adminModel.updatePassword(id, newPassword);
+            await this.adminRepository.updatePassword(id, newPassword);
             await this.analytics.trackEvent('password_changed', { adminId: id });
             this.logger.info(`Password changed successfully for admin: ${id}`);
             return true;
@@ -183,7 +183,7 @@ export class AdminService {
 
     async getAllAdmins(): Promise<IAdmin[]> {
         try {
-            const admins = await this.adminModel.findAll();
+            const admins = await this.adminRepository.findAll();
             await this.analytics.trackEvent('admins_list_viewed');
             return admins;
         } catch (error: any) {

@@ -1,22 +1,22 @@
 import { IProfile, IUpdateProfile } from '../types/entities';
-import { Profile } from '../models/Profile';
+import { ProfileRepository } from '../respositories/ProfileRepository';
 import { StorageService } from './StorageService';
 import { Logger } from '../utils/logger';
 import { AppError } from '@/middleware/errorMiddleware';
 
 export class ProfileService {
-    private profileModel: Profile;
+    private profileRepository: ProfileRepository;
     private storageService: StorageService;
     private logger = Logger.getInstance();
     
     constructor() {
-        this.profileModel = new Profile();
+        this.profileRepository = new ProfileRepository();
         this.storageService = new StorageService();
     }
 
     async getProfile(): Promise<IProfile> {
         try {
-            const profiles = await this.profileModel.findAll();
+            const profiles = await this.profileRepository.findAll();
             if (!profiles.length) {
                 throw new AppError('No profile found', 404); // AppError with status code
             }
@@ -30,7 +30,7 @@ export class ProfileService {
     async updateProfile(profileData: IUpdateProfile): Promise<IProfile> {
         try {
             const currentProfile = await this.getProfile();
-            const updatedProfile = await this.profileModel.update(currentProfile.id, profileData);
+            const updatedProfile = await this.profileRepository.update(currentProfile.id, profileData);
             if (!updatedProfile) {
                 throw new Error('Failed to update profile');
             }
@@ -50,7 +50,7 @@ export class ProfileService {
                 ['image/jpeg', 'image/png']
             );
 
-            const updatedProfile = await this.profileModel.updateAvatar(currentProfile.id, avatarUrl);
+            const updatedProfile = await this.profileRepository.updateAvatar(currentProfile.id, avatarUrl);
             if (!updatedProfile) {
                 throw new Error('Failed to update avatar');
             }
@@ -75,7 +75,7 @@ export class ProfileService {
                 ['application/pdf']
             );
 
-            const updatedProfile = await this.profileModel.updateResume(currentProfile.id, resumeUrl);
+            const updatedProfile = await this.profileRepository.updateResume(currentProfile.id, resumeUrl);
             if (!updatedProfile) {
                 throw new Error('Failed to update resume');
             }

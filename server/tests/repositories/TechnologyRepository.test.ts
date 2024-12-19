@@ -1,4 +1,4 @@
-import { Technology } from '../../src/models/Technology';
+import { TechnologyRepository } from '../../src/respositories/TechnologyRepository';
 import { supabase } from '../../src/config/supabase';
 import { AppError } from '../../src/middleware/errorMiddleware';
 import { mockTechnology } from '../utils/mockHelpers';
@@ -45,11 +45,11 @@ jest.mock('../../src/utils/logger', () => ({
 }));
 
 describe('Technology Model', () => {
-    let technologyModel: Technology;
+    let technologyModel: TechnologyRepository;
 
     beforeEach(() => {
         jest.clearAllMocks();
-        technologyModel = new Technology();
+        technologyModel = new TechnologyRepository();
     });
 
     describe('CRUD Operations', () => {

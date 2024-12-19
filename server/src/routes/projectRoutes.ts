@@ -45,6 +45,12 @@ router.put('/:id',
     projectController.updateProject.bind(projectController)
 );
 
+router.delete('/:id',
+    authenticate,
+    requireAdmin,
+    projectController.deleteProject.bind(projectController)
+);
+
 // File upload routes with upload middleware
 router.post(
     '/:id/thumbnail',
@@ -52,7 +58,7 @@ router.post(
     requireAdmin,
     upload.single('thumbnail'),
     handleUpload('projects'),
-    projectController.uploadThumbnail.bind(projectController)
+    projectController.updateThumbnail.bind(projectController)
 );
 
 router.post(
@@ -61,5 +67,5 @@ router.post(
     requireAdmin,
     upload.array('images', 5),
     handleUpload('projects'),
-    projectController.uploadImages.bind(projectController)
+    projectController.updateImages.bind(projectController)
 );

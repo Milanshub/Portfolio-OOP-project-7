@@ -1,4 +1,4 @@
-import { Profile } from '../../src/models/Profile';
+import { ProfileRepository } from '../../src/respositories/ProfileRepository';
 import { supabase } from '../../src/config/supabase';
 import { AppError } from '../../src/middleware/errorMiddleware';
 import { mockProfile } from '../utils/mockHelpers';
@@ -44,11 +44,11 @@ jest.mock('../../src/utils/logger', () => ({
 }));
 
 describe('Profile Model', () => {
-    let profileModel: Profile;
+    let profileModel: ProfileRepository;
 
     beforeEach(() => {
         jest.clearAllMocks();
-        profileModel = new Profile();
+        profileModel = new ProfileRepository();
     });
 
     describe('CRUD Operations', () => {
