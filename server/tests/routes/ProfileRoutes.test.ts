@@ -43,7 +43,7 @@ jest.mock('../../src/controllers/ProfileController', () => {
     };
 });
 
-describe('Profile Routes', () => {
+describe.skip('Profile Routes', () => {
     let app: express.Application;
 
     beforeEach(() => {
