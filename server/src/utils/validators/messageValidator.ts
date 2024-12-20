@@ -6,7 +6,7 @@ export const messageValidator = {
     validateCreate: (data: ICreateMessage): string[] => {
         const errors: string[] = [];
 
-        if (!data.senderName?.trim()) {
+        if (!data.sender_name?.trim()) {
             errors.push('Sender name is required');
         }
 

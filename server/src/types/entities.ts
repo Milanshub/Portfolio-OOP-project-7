@@ -76,7 +76,7 @@ export interface IUpdateTechnology extends Partial<ICreateTechnology> {};
 // Message interfaces
 export interface IMessage {
     id: string;
-    senderName: string;
+    sender_name: string;
     sender_email: string;
     subject: string;
     message: string;
@@ -84,7 +84,7 @@ export interface IMessage {
     read: boolean;
 }
 
-export interface ICreateMessage extends Omit<IMessage, 'id' | 'createdAt' | 'read'> {};
+export interface ICreateMessage extends Omit<IMessage, 'id' | 'created_at' | 'read'> {};
 export interface IUpdateMessage extends Partial<ICreateMessage> {};
 
 // Analytics interfaces

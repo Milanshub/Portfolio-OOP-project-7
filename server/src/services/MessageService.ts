@@ -58,7 +58,7 @@ export class MessageService {
             }
 
             // Validate required fields
-            if (!messageData.senderName.trim() || !messageData.message.trim()) {
+            if (!messageData.sender_name.trim() || !messageData.message.trim()) {
                 this.logger.warn('Attempted to create message with missing required fields');
                 throw new AppError('Name and message are required', 400);
             }
@@ -114,7 +114,7 @@ export class MessageService {
         const emailContent = `
             New Message from Portfolio Contact Form
             
-            From: ${message.senderName} (${message.sender_email})
+            From: ${message.sender_name} (${message.sender_email})
             Subject: ${message.subject}
             
             Message:
@@ -125,7 +125,7 @@ export class MessageService {
 
         await sendEmail({
             to: this.adminEmail!,
-            subject: `New Contact Form Message from ${message.senderName}`,
+            subject: `New Contact Form Message from ${message.sender_name}`,
             text: emailContent
         });
     }

@@ -99,7 +99,7 @@ describe('Message Model', () => {
 
         it('should create new message', async () => {
             const newMessage = {
-                senderName: 'Test Sender',
+                sender_name: 'Test Sender',
                 sender_email: 'test@example.com',
                 subject: 'Test Subject',
                 message: 'Test Message'

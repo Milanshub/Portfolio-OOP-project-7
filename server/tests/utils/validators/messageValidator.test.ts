@@ -20,7 +20,7 @@ describe('messageValidator', () => {
     describe('validateCreate', () => {
         // Use mockMessage to create valid message data
         const validMessage: ICreateMessage = {
-            senderName: mockMessage.senderName,
+            sender_name: mockMessage.sender_name,
             sender_email: mockMessage.sender_email,
             subject: mockMessage.subject,
             message: mockMessage.message
@@ -32,7 +32,7 @@ describe('messageValidator', () => {
         });
 
         it('should validate required sender name', () => {
-            const invalidMessage = { ...validMessage, senderName: '' };
+            const invalidMessage = { ...validMessage, sender_name: '' };
             const errors = messageValidator.validateCreate(invalidMessage);
             expect(errors).toContain('Sender name is required');
         });
@@ -64,7 +64,7 @@ describe('messageValidator', () => {
 
         it('should handle whitespace-only values', () => {
             const invalidMessage: ICreateMessage = {
-                senderName: '   ',
+                sender_name: '   ',
                 sender_email: '   ',
                 subject: '   ',
                 message: '   '
@@ -87,7 +87,7 @@ describe('messageValidator', () => {
 
         it('should handle null values', () => {
             const invalidMessage = {
-                senderName: null,
+                sender_name: null,
                 sender_email: null,
                 subject: null,
                 message: null
@@ -102,7 +102,7 @@ describe('messageValidator', () => {
 
         it('should validate multiple errors simultaneously', () => {
             const invalidMessage: ICreateMessage = {
-                senderName: '',
+                sender_name: '',
                 sender_email: 'invalid-email',
                 subject: '',
                 message: ''
