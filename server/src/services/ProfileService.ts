@@ -2,7 +2,7 @@ import { IProfile, IUpdateProfile } from '../types/entities';
 import { ProfileRepository } from '../respositories/ProfileRepository';
 import { StorageService } from './StorageService';
 import { Logger } from '../utils/logger';
-import { AppError } from '@/middleware/errorMiddleware';
+import { AppError } from '../middleware/errorMiddleware';
 
 export class ProfileService {
     private profileRepository: ProfileRepository;

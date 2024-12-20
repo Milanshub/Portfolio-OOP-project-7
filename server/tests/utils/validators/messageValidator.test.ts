@@ -21,7 +21,7 @@ describe('messageValidator', () => {
         // Use mockMessage to create valid message data
         const validMessage: ICreateMessage = {
             senderName: mockMessage.senderName,
-            senderEmail: mockMessage.senderEmail,
+            sender_email: mockMessage.sender_email,
             subject: mockMessage.subject,
             message: mockMessage.message
         };
@@ -38,7 +38,7 @@ describe('messageValidator', () => {
         });
 
         it('should validate required sender email', () => {
-            const invalidMessage = { ...validMessage, senderEmail: '' };
+            const invalidMessage = { ...validMessage, sender_email: '' };
             const errors = messageValidator.validateCreate(invalidMessage);
             expect(errors).toContain('Sender email is required');
         });
@@ -51,7 +51,7 @@ describe('messageValidator', () => {
 
         it('should validate email format', () => {
             (stringHelpers.isValidEmail as jest.Mock).mockReturnValue(false);
-            const invalidMessage = { ...validMessage, senderEmail: 'invalid-email' };
+            const invalidMessage = { ...validMessage, sender_email: 'invalid-email' };
             const errors = messageValidator.validateCreate(invalidMessage);
             expect(errors).toContain('Invalid email format');
         });
@@ -65,7 +65,7 @@ describe('messageValidator', () => {
         it('should handle whitespace-only values', () => {
             const invalidMessage: ICreateMessage = {
                 senderName: '   ',
-                senderEmail: '   ',
+                sender_email: '   ',
                 subject: '   ',
                 message: '   '
             };
@@ -88,7 +88,7 @@ describe('messageValidator', () => {
         it('should handle null values', () => {
             const invalidMessage = {
                 senderName: null,
-                senderEmail: null,
+                sender_email: null,
                 subject: null,
                 message: null
             } as unknown as ICreateMessage;
@@ -103,7 +103,7 @@ describe('messageValidator', () => {
         it('should validate multiple errors simultaneously', () => {
             const invalidMessage: ICreateMessage = {
                 senderName: '',
-                senderEmail: 'invalid-email',
+                sender_email: 'invalid-email',
                 subject: '',
                 message: ''
             };

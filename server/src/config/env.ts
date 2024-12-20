@@ -2,7 +2,7 @@
 import dotenv from 'dotenv'
 
 // Load environment variables from .env file into process.env
-dotenv.config()
+dotenv.config({ path: '.env.local' })
 
 // Check if required Supabase environment variables exist
 // If they don't exist, throw an error

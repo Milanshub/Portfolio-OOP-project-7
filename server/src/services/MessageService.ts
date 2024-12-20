@@ -52,8 +52,8 @@ export class MessageService {
     async createMessage(messageData: ICreateMessage): Promise<IMessage> {
         try {
             // Validate email format
-            if (!emailValidator.isValidEmail(messageData.senderEmail)) {
-                this.logger.warn(`Invalid email format attempted: ${messageData.senderEmail}`);
+            if (!emailValidator.isValidEmail(messageData.sender_email)) {
+                this.logger.warn(`Invalid email format attempted: ${messageData.sender_email}`);
                 throw new AppError('Invalid email format', 400);
             }
 
@@ -68,7 +68,7 @@ export class MessageService {
             // Send email notification
             await this.sendEmailNotification(message);
 
-            this.logger.info(`New message created from: ${messageData.senderEmail}`);
+            this.logger.info(`New message created from: ${messageData.sender_email}`);
             return message;
         } catch (error: any) {
             this.logger.error('Failed to create message:', error);
@@ -114,13 +114,13 @@ export class MessageService {
         const emailContent = `
             New Message from Portfolio Contact Form
             
-            From: ${message.senderName} (${message.senderEmail})
+            From: ${message.senderName} (${message.sender_email})
             Subject: ${message.subject}
             
             Message:
             ${message.message}
             
-            Sent at: ${message.createdAt}
+            Sent at: ${message.created_at}
         `;
 
         await sendEmail({

@@ -100,7 +100,7 @@ describe('Message Model', () => {
         it('should create new message', async () => {
             const newMessage = {
                 senderName: 'Test Sender',
-                senderEmail: 'test@example.com',
+                sender_email: 'test@example.com',
                 subject: 'Test Subject',
                 message: 'Test Message'
             };
@@ -121,7 +121,7 @@ describe('Message Model', () => {
             expect(result).toHaveProperty('id', '2');
             expect(insertMock).toHaveBeenCalledWith({
                 ...newMessage,
-                createdAt: expect.any(Date),
+                created_at: expect.any(Date),
                 read: false
             });
         });
@@ -221,7 +221,7 @@ describe('Message Model', () => {
 
             expect(result).toEqual(mockUnreadMessages);
             expect(eqMock).toHaveBeenCalledWith('read', false);
-            expect(orderMock).toHaveBeenCalledWith('createdAt', { ascending: false });
+            expect(orderMock).toHaveBeenCalledWith('created_at', { ascending: false });
         });
     });
 

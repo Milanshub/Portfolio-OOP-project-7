@@ -77,10 +77,10 @@ export interface IUpdateTechnology extends Partial<ICreateTechnology> {};
 export interface IMessage {
     id: string;
     senderName: string;
-    senderEmail: string;
+    sender_email: string;
     subject: string;
     message: string;
-    createdAt: Date;
+    created_at: Date;
     read: boolean;
 }
 

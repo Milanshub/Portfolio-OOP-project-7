@@ -10,9 +10,9 @@ export const messageValidator = {
             errors.push('Sender name is required');
         }
 
-        if (!data.senderEmail?.trim()) {
+        if (!data.sender_email?.trim()) {
             errors.push('Sender email is required');
-        } else if (!stringHelpers.isValidEmail(data.senderEmail)) {
+        } else if (!stringHelpers.isValidEmail(data.sender_email)) {
             errors.push('Invalid email format');
         }
 

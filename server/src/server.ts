@@ -3,7 +3,7 @@ import app from './app';
 import { Logger } from './utils/logger';
 
 // Load environment variables
-dotenv.config();
+dotenv.config({ path: '.env.local' });
 
 const logger = Logger.getInstance();
 const port = process.env.PORT || 5000;

@@ -3,7 +3,7 @@ import { IRepository } from './IRepository';
 
 export interface IMessageModel extends IRepository<
     IMessage,
-    Omit<IMessage, 'id' | 'createdAt' | 'read'>,
+    Omit<IMessage, 'id' | 'created_at' | 'read'>,
     Partial<IMessage>
 > {
     markAsRead(id: string): Promise<IMessage | null>;

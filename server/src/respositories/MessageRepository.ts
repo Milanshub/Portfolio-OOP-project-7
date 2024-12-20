@@ -14,7 +14,7 @@ export class MessageRepository implements IMessageModel {
             const { data, error } = await supabase
                 .from(this.tableName)
                 .select('*')
-                .order('createdAt', { ascending: false });
+                .order('created_at', { ascending: false });
             
             if (error) throw error;
             return data as IMessage[];
@@ -41,14 +41,14 @@ export class MessageRepository implements IMessageModel {
         }
     }
 
-    async create(message: Omit<IMessage, 'id' | 'createdAt' | 'read'>): Promise<IMessage> {
+    async create(message: Omit<IMessage, 'id' | 'created_at' | 'read'>): Promise<IMessage> {
         try {
             this.logger.debug('Creating new message:', message);
             const { data, error } = await supabase
                 .from(this.tableName)
                 .insert({
                     ...message,
-                    createdAt: new Date(),
+                    created_at: new Date(),
                     read: false
                 })
                 .select()
@@ -138,7 +138,7 @@ export class MessageRepository implements IMessageModel {
                 .from(this.tableName)
                 .select('*')
                 .eq('read', false)
-                .order('createdAt', { ascending: false });
+                .order('created_at', { ascending: false });
             
             if (error) throw error;
             return data as IMessage[];

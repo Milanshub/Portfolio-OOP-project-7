@@ -57,10 +57,10 @@ export const mockTechnology: ITechnology = {
 export const mockMessage: IMessage = {
     id: '1',
     senderName: 'John Doe',
-    senderEmail: 'john@example.com',
+    sender_email: 'john@example.com',
     subject: 'Test Subject',
     message: 'Test Message Content',
-    createdAt: new Date(),
+    created_at: new Date(),
     read: false
 };
 

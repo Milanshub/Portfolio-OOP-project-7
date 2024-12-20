@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import { Logger } from '../utils/logger';
 import { Cache } from '../utils/cache';
 import { AppError } from './errorMiddleware';
-import { supabase } from '@/config/supabase';
+import { supabase } from '../config/supabase';
 
 interface JwtPayload {
     id: string;
