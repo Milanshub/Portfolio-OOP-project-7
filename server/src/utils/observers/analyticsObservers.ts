@@ -1,4 +1,3 @@
-// src/utils/observers/analyticsObservers.ts
 import { AnalyticsService } from '../../services/AnalyticsService';
 
 export class AnalyticsObserver {

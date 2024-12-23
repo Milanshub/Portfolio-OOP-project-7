@@ -1,0 +1,120 @@
+@media print {
+  /* Hide non-essential elements */
+  header nav,
+  footer,
+  .share-buttons,
+  .theme-toggle,
+  .contact-form,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Ensure white background and black text */
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt;
+    line-height: 1.5;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Optimize headings */
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Handle links */
+  a {
+    text-decoration: none !important;
+    color: black !important;
+  }
+
+  a[href^="http"]:after {
+    content: " (" attr(href) ")";
+    font-size: 90%;
+  }
+
+  /* Project sections */
+  .project {
+    page-break-inside: avoid;
+    margin-bottom: 1cm;
+  }
+
+  /* Skills and technologies */
+  .skills-grid {
+    display: block !important;
+    break-inside: avoid;
+  }
+
+  .skill-item {
+    break-inside: avoid;
+    margin-bottom: 0.5cm;
+  }
+
+  /* Contact information */
+  .contact-info {
+    break-before: page;
+    margin-top: 1cm;
+  }
+
+  /* Images */
+  img {
+    max-width: 100% !important;
+    page-break-inside: avoid;
+  }
+
+  /* Code blocks */
+  pre, code {
+    white-space: pre-wrap !important;
+    word-wrap: break-word !important;
+    border: 1px solid #ddd;
+    padding: 0.5cm;
+    background: none !important;
+  }
+
+  /* Tables */
+  table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+  }
+
+  table, th, td {
+    border: 1px solid black !important;
+  }
+
+  /* Print-specific elements */
+  .print-only {
+    display: block !important;
+  }
+
+  .print-header {
+    text-align: center;
+    margin-bottom: 1cm;
+  }
+
+  .print-footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 10pt;
+    padding: 0.5cm 0;
+  }
+
+  /* Page breaks */
+  .page-break {
+    page-break-before: always;
+  }
+
+  /* QR Code for digital version */
+  .portfolio-qr {
+    display: block !important;
+    position: fixed;
+    bottom: 1cm;
+    right: 1cm;
+    width: 2cm !important;
+    height: 2cm !important;
+  }
+} 
