@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 import { useAuth } from '@/hooks/auth/useAuth'
 import { useZodForm } from '@/hooks/form/useZodForm'
 import { registerSchema, type RegisterFormData } from '@/lib/validations/auth'
-import { useLoading } from '@/contexts/LoadingContext'
+import { useLoading } from '@/contexts'
 import { toastError, toastSuccess } from '@/lib/utils/error'
 
 export default function RegisterPage() {

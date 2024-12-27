@@ -1,0 +1,1 @@
+export { technologyService } from './technologyService'; 

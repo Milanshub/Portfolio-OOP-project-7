@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import { DashboardLayout } from '@/components/layout'
-import { Loading } from '@/components/ui/loading'
+import { Loader } from '@/components/ui/spinner-loader'
 
 // Metadata for dashboard routes
 export const metadata = {
@@ -18,7 +18,7 @@ export default function Layout({ children }: DashboardLayoutProps) {
       <Suspense 
         fallback={
           <div className="flex h-[calc(100vh-4rem)] items-center justify-center">
-            <Loading size="lg" text="Loading..." />
+            <Loader size="lg" text="Loading..." />
           </div>
         }
       >
