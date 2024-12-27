@@ -1,5 +1,5 @@
-import { inter } from '@/lib/utils/fonts'
-import { cn } from '@/lib/utils'
+import { inter } from '@/lib/theme/fonts'
+import { cn } from '@/lib/theme/utils'
 import { ThemeProvider } from '@/components/providers/theme-provider'
 import { LoadingProvider } from '@/contexts/LoadingContext'
 import '@/styles/globals.module.css'

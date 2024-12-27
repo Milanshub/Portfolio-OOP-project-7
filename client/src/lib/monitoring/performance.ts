@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 
-// Types
+// ===== PERFORMANCE MONITORING =====
+// This file contains the performance monitoring for our application
+// It includes the PerformanceMonitor class and the PerformanceData interface
+// The PerformanceMonitor class is used to monitor the performance of the user
+// The PerformanceData interface is used to define the structure of the performance data
+
 interface PerformanceMetric {
   name: string;
   value: number;

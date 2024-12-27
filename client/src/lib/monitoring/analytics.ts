@@ -1,3 +1,9 @@
+// ===== ANALYTICS =====
+// This file contains the analytics for our application
+// It includes the Analytics class and the AnalyticsEvent interface
+// The Analytics class is used to track the analytics of the user
+// The AnalyticsEvent interface is used to define the structure of the analytics event
+
 interface AnalyticsEvent {
   name: string;
   properties?: Record<string, any>;

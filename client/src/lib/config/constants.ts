@@ -1,3 +1,7 @@
+// ===== APP CONSTANTS =====
+// This file contains constants used throughout the application
+// These constants are used to define the behavior and structure of the application
+
 export const APP_CONSTANTS = {
   APP_NAME: 'Your Portfolio',
   DEFAULT_LOCALE: 'en',

@@ -31,8 +31,9 @@
       "@/services/*": ["./src/services/*"],
       "@/types/*": ["./src/types/*"],
       "@/utils/*": ["./src/lib/utils/*"],
-      "@/styles/*": ["./src/styles/*"]
-    }
+      "@/styles/*": ["src/themes/*"]
+    },
+    "baseUrl": "."
   },
   "include": [
     "next-env.d.ts",

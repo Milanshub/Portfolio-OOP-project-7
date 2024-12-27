@@ -4,6 +4,12 @@ import { dashboardConfig, DASHBOARD_ROUTES, SETTINGS_ROUTES } from './dashboard'
 import { apiConfig, projectPaths } from './api'
 import { featureFlags, isFeatureEnabled, isProviderEnabled } from './features'
 
+// ===== CONFIG EXPORTS ===== 
+// This file exports all the configuration objects for our application
+// It includes the site configuration, dashboard configuration, API configuration, and feature flags
+// Each configuration object is exported with its corresponding type
+// The configuration objects are used to define the behavior and structure of the application
+
 // Site configuration
 export { siteConfig } from './site'
 export type { SiteConfig } from './site'

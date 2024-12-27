@@ -1,3 +1,9 @@
+// ===== RATE LIMITER =====
+// This file contains the rate limiter for our application
+// It includes the RateLimiter class and the RateLimitEntry interface
+// The RateLimiter class is used to check if a user has exceeded the rate limit
+// The RateLimitEntry interface is used to define the structure of the rate limit data
+
 interface RateLimitEntry {
   attempts: number;
   firstAttempt: number;

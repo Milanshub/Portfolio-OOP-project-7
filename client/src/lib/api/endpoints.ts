@@ -2,7 +2,16 @@ import { apiConfig, projectPaths } from '@/config'
 import { axiosInstance } from './client'
 import type { ApiResponse } from './client'
 
+// ===== API ENDPOINTS =====
+// This file contains the API endpoints for our application
+// It includes the API endpoints for authentication, profile, projects, messages, and analytics
+// Each endpoint is defined with its corresponding type
+// The endpoints are used to interact with the API and perform CRUD operations
+
 // Request/Response Types
+// These types define the structure of the request and response data for each endpoint
+// They are used to ensure type safety when interacting with the API
+// They are defined in the AuthData, ProfileData, ProjectData, MessageData, and AnalyticsData interfaces
 interface AuthData {
   email: string
   password: string
@@ -104,9 +113,6 @@ export const profileApi = {
       { headers: { 'Content-Type': 'multipart/form-data' } }
     ),
 }
-
-// Projects endpoints
-// ... rest of the code remains the same ...
 
 // Projects endpoints
 export const projectsApi = {

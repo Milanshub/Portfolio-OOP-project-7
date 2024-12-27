@@ -1,12 +1,19 @@
 import { env } from '@/lib/config/env'
 import { APP_CONSTANTS } from '@/lib/config/constants'
 
+
+// ===== SOCIAL LINKS =====
+// This interface defines the social links for our application
+// It includes the GitHub, LinkedIn, and Twitter links
 interface SocialLinks {
   github: string
   linkedin: string
   twitter: string
 }
 
+// ===== AUTHOR =====
+// This interface defines the author for our application
+// It includes the name, URL, avatar, and role
 interface Author {
   name: string
   url: string
@@ -14,6 +21,9 @@ interface Author {
   role?: string
 }
 
+// ===== SITE CONFIGURATION =====
+// This interface defines the configuration for our application
+// It includes the name, description, URL, ogImage, links, creator, keywords, authors, defaultLocale, themeColor, and metadata
 interface SiteConfigType {
   name: string
   description: string
@@ -38,6 +48,9 @@ interface SiteConfigType {
   }
 }
 
+// ===== SITE CONFIGURATION =====
+// This object contains the configuration for our application
+// It includes the name, description, URL, ogImage, links, creator, keywords, authors, defaultLocale, themeColor, and metadata
 export const siteConfig: SiteConfigType = {
   name: APP_CONSTANTS.APP_NAME,
   description: 'A showcase of my work and professional experience',
@@ -80,5 +93,8 @@ export const siteConfig: SiteConfigType = {
   },
 } as const
 
+// ===== SITE CONFIGURATION TYPE =====
+// This type defines the configuration for our application
+// It includes the name, description, URL, ogImage, links, creator, keywords, authors, defaultLocale, themeColor, and metadata
 export type SiteConfig = typeof siteConfig
 export type { SiteConfigType, Author, SocialLinks }

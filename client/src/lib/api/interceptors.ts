@@ -6,6 +6,13 @@ import { toast } from 'sonner'
 import { apiConfig } from '@/config'
 import type { ApiResponse, ExtendedAxiosRequestConfig } from './client'
 
+// ===== API INTERCEPTORS =====
+// This file contains the interceptors for the API
+// It includes the request interceptor and the response interceptor
+// The interceptors are used to handle the API requests and responses
+// They are used to handle the API requests and responses
+// They are used to handle the API requests and responses
+
 interface RefreshTokenResponse {
   token: string
   expiresIn: number

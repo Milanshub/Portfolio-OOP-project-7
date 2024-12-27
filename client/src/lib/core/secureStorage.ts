@@ -1,6 +1,15 @@
 import { AES, enc } from 'crypto-js';
+import { env } from '@/lib/config/env';
 
-const ENCRYPTION_KEY = process.env.NEXT_PUBLIC_STORAGE_KEY || 'default-secure-key-12345';
+// ===== SECURE STORAGE =====
+// This file contains the secure storage for our application
+// It includes the SecureStorage class and the setItem, getItem, removeItem, and clear methods
+// The setItem method is used to store data in the secure storage
+// The getItem method is used to retrieve data from the secure storage
+// The removeItem method is used to remove data from the secure storage
+// The clear method is used to clear all data from the secure storage
+
+const ENCRYPTION_KEY = env.NEXT_PUBLIC_STORAGE_KEY;
 
 export class SecureStorage {
   private static prefix = 'secure_';

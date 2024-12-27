@@ -1,4 +1,4 @@
-import { api } from '@/lib/api';
+import { api } from '@/lib/api/client';
 import { SecureStorage } from '@/lib/core/secureStorage';
 import { AuthResponse, LoginRequest, RegisterRequest, User } from '@/types';
 

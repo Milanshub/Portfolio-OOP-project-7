@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
+import registry from '@/registry/default'
 
 // Create a new ratelimiter that allows 10 requests per 10 seconds
 const ratelimit = new Ratelimit({
@@ -82,6 +83,12 @@ export async function middleware(request: NextRequest) {
     if (!csrfToken || csrfToken !== expectedToken) {
       return new NextResponse('Invalid CSRF token', { status: 403 });
     }
+  }
+
+  // Check if security features are enabled
+  if (registry.features.isEnabled('security')) {
+    // Apply rate limiting
+    registry.security.applyRateLimiting(request)
   }
 
   return response;

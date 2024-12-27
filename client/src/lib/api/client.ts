@@ -3,13 +3,19 @@ import { toast } from 'sonner';
 import { AppError, AuthError, ValidationError, NetworkError } from '@/lib/utils/error';
 import { apiConfig } from '@/config';
 
-// Types
+// ===== API TYPES =====  
+// This file contains the types for the API
+// It includes the ApiResponse, ApiError, and RefreshTokenResponse types
+// These types are used to define the structure of the API responses and errors
+
+// Define the structure of the API response
 interface ApiResponse<T = any> {
   data: T;
   status: number;
   message?: string;
 }
 
+// Define the structure of the API error
 interface ApiError {
   message: string;
   code?: string;
@@ -17,6 +23,7 @@ interface ApiError {
   details?: unknown;
 }
 
+// Define the structure of the refresh token response
 interface RefreshTokenResponse {
   token: string;
 }
@@ -39,6 +46,7 @@ class ApiRequestError extends Error {
   }
 }
 
+// Define the API client class
 class ApiClient {
   private static instance: ApiClient;
   private isRefreshing = false;

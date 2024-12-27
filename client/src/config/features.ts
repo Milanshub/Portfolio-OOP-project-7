@@ -1,6 +1,13 @@
 import { env } from '@/lib/config/env'
 import { APP_CONSTANTS } from '@/lib/config/constants'
 
+// ===== FEATURE FLAGS =====
+// This file contains the feature flags for our application
+// Feature flags are used to enable or disable features in the application
+// They are defined in the featureFlags object
+// The featureFlags object is used to check if a feature is enabled or disabled
+// The featureFlags object is used to enable or disable features in the application
+
 // Types for feature flags
 interface AuthFeatures {
   enabled: boolean
@@ -11,6 +18,7 @@ interface AuthFeatures {
   mfa: boolean
 }
 
+// Project features
 interface ProjectFeatures {
   githubSync: boolean
   imageOptimization: boolean
@@ -19,6 +27,7 @@ interface ProjectFeatures {
   maxSize: number
 }
 
+// Security features
 interface SecurityFeatures {
   reCaptcha: boolean
   rateLimiting: boolean
@@ -26,11 +35,13 @@ interface SecurityFeatures {
   lockoutDuration: number
 }
 
+// Analytics features
 interface AnalyticsFeatures {
   enabled: boolean
   provider: 'custom' | 'google' | 'plausible'
 }
 
+// Performance features
 interface PerformanceFeatures {
   imageOptimization: boolean
   lazyLoading: boolean
@@ -38,11 +49,13 @@ interface PerformanceFeatures {
   monitoring: boolean
 }
 
+// Experimental features
 interface ExperimentalFeatures {
   newProjectUI: boolean
   betaFeatures: boolean
 }
 
+// Main feature flags configuration interface
 interface FeatureFlagsConfig {
   auth: AuthFeatures
   projects: ProjectFeatures
@@ -52,6 +65,7 @@ interface FeatureFlagsConfig {
   experimental: ExperimentalFeatures
 }
 
+// Define the feature flags configuration
 export const featureFlags: FeatureFlagsConfig = {
   auth: {
     enabled: true,
@@ -95,9 +109,11 @@ export const isFeatureEnabled = (feature: keyof FeatureFlagsConfig) => {
   return featureFlags[feature]
 }
 
+// Helper function to check if a provider is enabled
 export const isProviderEnabled = (provider: 'github' | 'google') => {
   return featureFlags.auth.providers[provider]
 }
 
+// Export the feature flags configuration
 export type FeatureFlags = typeof featureFlags
 export type { FeatureFlagsConfig }

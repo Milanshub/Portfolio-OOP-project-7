@@ -1,4 +1,4 @@
-import { api } from '@/lib/api';
+import { api } from '@/lib/api/client';
 import { Profile } from '@/types';
 
 class ProfileService {

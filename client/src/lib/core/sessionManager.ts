@@ -1,3 +1,9 @@
+// ===== SESSION MANAGER =====
+// This file contains the session manager for our application
+// It includes the SessionManager class and the SessionEvent interface
+// The SessionManager class is used to manage the session of the user
+// The SessionEvent interface is used to define the structure of the session event
+
 type SessionEventType = 'login' | 'logout' | 'token_refresh' | 'session_expired';
 
 interface SessionEvent {
@@ -24,13 +30,14 @@ export class SessionManager {
     this.startHeartbeat();
   }
 
-  static getInstance(): SessionManager {
+  public static getInstance(): SessionManager {
     if (!SessionManager.instance) {
       SessionManager.instance = new SessionManager();
     }
     return SessionManager.instance;
   }
 
+  // Event handling methods
   private setupEventListeners(): void {
     // Listen for broadcast messages
     this.channel.onmessage = (event) => {
@@ -54,7 +61,6 @@ export class SessionManager {
 
   private startHeartbeat(): void {
     this.heartbeatInterval = setInterval(() => {
-      // Emit heartbeat event to other tabs
       this.channel.postMessage({
         type: 'heartbeat',
         timestamp: Date.now(),
@@ -77,12 +83,12 @@ export class SessionManager {
     this.listeners.forEach(listener => listener(event));
   }
 
-  addEventListener(listener: SessionEventListener): () => void {
+  public addEventListener(listener: SessionEventListener): () => void {
     this.listeners.add(listener);
     return () => this.listeners.delete(listener);
   }
 
-  emit(type: SessionEventType): void {
+  public emit(type: SessionEventType): void {
     const event: SessionEvent = {
       type,
       timestamp: Date.now(),
@@ -96,11 +102,71 @@ export class SessionManager {
     this.channel.postMessage(event);
   }
 
-  destroy(): void {
+  public destroy(): void {
     if (this.heartbeatInterval) {
       clearInterval(this.heartbeatInterval);
     }
     this.channel.close();
     this.listeners.clear();
   }
-} 
+
+  // Authentication methods
+  public async signIn(credentials: { email: string; password: string }) {
+    try {
+      // Implement sign in logic here
+      // After successful sign in:
+      this.emit('login');
+    } catch (error) {
+      console.error('Sign in failed:', error);
+      throw error;
+    }
+  }
+
+  public async signInWithGithub() {
+    try {
+      // You might want to use next-auth or a similar library here
+      window.location.href = '/api/auth/signin/github';
+      this.emit('login');
+    } catch (error) {
+      console.error('GitHub sign in failed:', error);
+      throw error;
+    }
+  }
+
+  public async signInWithGoogle() {
+    try {
+      // Implement Google OAuth sign in
+      this.emit('login');
+    } catch (error) {
+      console.error('Google sign in failed:', error);
+      throw error;
+    }
+  }
+
+  public async signOut() {
+    try {
+      // Implement sign out logic
+      this.emit('logout');
+    } catch (error) {
+      console.error('Sign out failed:', error);
+      throw error;
+    }
+  }
+
+  public async getSession() {
+    // Get current session
+  }
+
+  public async refreshSession() {
+    try {
+      // Implement session refresh logic
+      this.emit('token_refresh');
+    } catch (error) {
+      console.error('Session refresh failed:', error);
+      this.emit('session_expired');
+      throw error;
+    }
+  }
+}
+
+export const sessionManager = SessionManager.getInstance(); 

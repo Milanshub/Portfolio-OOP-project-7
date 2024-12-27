@@ -1,4 +1,4 @@
-import { api } from '@/lib/api';
+import { api } from '@/lib/api/client';
 import { Analytics, AnalyticsEvent } from '@/types';
 
 class AnalyticsService {
