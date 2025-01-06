@@ -1,47 +1,29 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
-    "allowJs": true,
-    "skipLibCheck": true,
+    "target": "ES6",
+    "module": "ESNext",
     "strict": true,
-    "noEmit": true,
+    "jsx": "react-jsx",
     "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl":  "." ,
     "paths": {
-      "@/*": ["./src/*"],
-      "@/components/*": ["./src/components/*"],
-      "@/lib/*": ["./src/lib/*"],
-      "@/hooks/*": ["./src/hooks/*"],
-      "@/contexts/*": ["./src/contexts/*"],
-      "@/services/*": ["./src/services/*"],
-      "@/types/*": ["./src/types/*"],
-      "@/utils/*": ["./src/lib/utils/*"],
-      "@/styles/*": ["src/themes/*"]
+      "@/*": ["src/*"],
     },
-    "baseUrl": "."
+    "moduleResolution": "node",
+    "types": ["jest", "node"]  // Ensure Jest types are included
   },
   "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts"
-  ],
+    "./",
+    "src/**/*.ts",          // Include .ts files in src
+    "src/**/*.tsx",         // Include .tsx files in src
+    "src/tests/**/*.ts", // Include .ts files in client/tests
+    "src/tests/**/*.tsx",// Include .tsx files in client/tests
+    "src/setupTests.ts"         // Ensure setupTests.ts is included
+, "src/mocks/mockContext.ts", "src/mocks/mockContext.tsx"  ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "dist"
   ]
 }
