@@ -1,29 +1,39 @@
 {
   "compilerOptions": {
-    "target": "ES6",
-    "module": "ESNext",
-    "strict": true,
-    "jsx": "react-jsx",
-    "esModuleInterop": true,
+    "target": "es5",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
     "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
     "forceConsistentCasingInFileNames": true,
-    "baseUrl":  "." ,
+    "noFallthroughCasesInSwitch": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
-    },
-    "moduleResolution": "node",
-    "types": ["jest", "node"]  // Ensure Jest types are included
+      "@components/*": ["src/components/*"],
+      "@hooks/*": ["src/hooks/*"],
+      "@context/*": ["src/context/*"],
+      "@utils/*": ["src/utils/*"],
+      "@types/*": ["src/types/*"],
+      "@services/*": ["src/services/*"],
+      "@styles/*": ["src/styles/*"],
+      "@assets/*": ["src/assets/*"],
+      "@lib/*": ["src/lib/*"]
+    }
   },
   "include": [
-    "./",
-    "src/**/*.ts",          // Include .ts files in src
-    "src/**/*.tsx",         // Include .tsx files in src
-    "src/tests/**/*.ts", // Include .ts files in client/tests
-    "src/tests/**/*.tsx",// Include .tsx files in client/tests
-    "src/setupTests.ts"         // Ensure setupTests.ts is included
-, "src/mocks/mockContext.ts", "src/mocks/mockContext.tsx"  ],
-  "exclude": [
-    "node_modules",
-    "dist"
+    "src"
   ]
 }
