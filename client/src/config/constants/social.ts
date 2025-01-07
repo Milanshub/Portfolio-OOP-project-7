@@ -53,8 +53,9 @@ export const socialLinks: SocialLink[] = [
 
 // Utility functions
 export const getSocialUsername = (platform: SocialPlatform): string => {
-  return SOCIAL_USERNAMES[platform] || '';
-};
+    if (platform === 'EMAIL') return '';
+    return SOCIAL_USERNAMES[platform as keyof typeof SOCIAL_USERNAMES] || '';
+  };
 
 export const getSocialUrl = (platform: SocialPlatform): string => {
   return SOCIAL_LINKS[platform] || '';
