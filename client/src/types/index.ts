@@ -2,6 +2,7 @@
 export * from './api/requests';
 export * from './api/responses';
 export * from './api/errors';
+export * from './api';  
 
 // Entity Types (matching server entities)
 export * from './entities/project';
