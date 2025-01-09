@@ -5,6 +5,7 @@ export interface User {
     name: string;
     email: string;
     role: 'user' | 'admin';
+    isAdmin: boolean;  // Add this property
     createdAt: string;
     updatedAt: string;
 }

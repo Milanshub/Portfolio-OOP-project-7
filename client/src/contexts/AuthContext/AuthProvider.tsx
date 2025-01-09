@@ -2,7 +2,7 @@ import { useReducer, useEffect } from 'react';
 import { AuthContext } from './AuthContext';
 import { authReducer } from './AuthReducer';
 import { authService } from '@/services';
-import { ApiError, LoginRequest } from '@/types';
+import { ApiError, LoginRequest, User } from '@/types';
 import { logger } from '@/config/logger';
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -14,7 +14,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     status: 'idle'
   });
 
-  // Validate token on mount and when token changes
   useEffect(() => {
     validateToken();
   }, []);
@@ -23,7 +22,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       dispatch({ type: 'AUTH_START' });
       const response = await authService.login(credentials);
-      dispatch({ type: 'AUTH_SUCCESS', payload: response.user });
+      const user: User = {
+        ...response.user,
+        isAdmin: response.user.role === 'admin'
+      };
+      dispatch({ type: 'AUTH_SUCCESS', payload: user });
       logger.info('User logged in successfully');
     } catch (error) {
       const apiError = error as ApiError;
@@ -50,7 +53,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const validateToken = async () => {
     try {
       dispatch({ type: 'AUTH_START' });
-      const user = await authService.validateToken();
+      const userData = await authService.validateToken();
+      const user: User = {
+        ...userData,
+        isAdmin: userData.role === 'admin'
+      };
       dispatch({ type: 'VALIDATE_TOKEN_SUCCESS', payload: user });
       logger.debug('Token validated successfully');
     } catch (error) {

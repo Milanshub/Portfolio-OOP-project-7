@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react';
 import { 
   AuthState, 
-  User, 
+  User,
   LoginRequest, 
   AuthResponse,
   AuthStatus,

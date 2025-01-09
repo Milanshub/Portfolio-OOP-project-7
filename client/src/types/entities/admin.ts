@@ -2,6 +2,7 @@ export interface Admin {
     id: string;
     name?: string;
     email: string;
+    isAdmin: boolean;
     password: string;
     lastLogin: Date;
 }
