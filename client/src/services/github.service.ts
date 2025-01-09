@@ -1,5 +1,7 @@
 import { api } from '@/lib/api/client';
 import { GitHubRepository, GitHubCommit } from '@/types';
+import { endpoints } from '@/lib/api/endpoints';
+import { logger } from '@/config/logger';
 
 class GitHubService {
   private static instance: GitHubService;
@@ -14,19 +16,41 @@ class GitHubService {
   }
 
   async getRepositories(): Promise<GitHubRepository[]> {
-    const response = await api.get<GitHubRepository[]>('/github/repositories');
-    return response;
+    try {
+      const response = await api.get<GitHubRepository[]>(endpoints.GITHUB.GET_REPOS);
+      logger.debug('GitHub repositories retrieved successfully');
+      return response.data;
+    } catch (error) {
+      logger.error('Failed to fetch GitHub repositories:', error as Error);
+      throw error;
+    }
   }
 
   async getRepository(name: string): Promise<GitHubRepository> {
-    const response = await api.get<GitHubRepository>(`/github/repository/${name}`);
-    return response;
+    try {
+      const response = await api.get<GitHubRepository>(
+        endpoints.GITHUB.GET_REPO(name)
+      );
+      logger.debug(`GitHub repository retrieved successfully: ${name}`);
+      return response.data;
+    } catch (error) {
+      logger.error(`Failed to fetch GitHub repository ${name}:`, error as Error);
+      throw error;
+    }
   }
 
   async getCommits(name: string): Promise<GitHubCommit[]> {
-    const response = await api.get<GitHubCommit[]>(`/github/repository/${name}/commits`);
-    return response;
+    try {
+      const response = await api.get<GitHubCommit[]>(
+        endpoints.GITHUB.GET_COMMITS(name)
+      );
+      logger.debug(`GitHub commits retrieved successfully for: ${name}`);
+      return response.data;
+    } catch (error) {
+      logger.error(`Failed to fetch commits for repository ${name}:`, error as Error);
+      throw error;
+    }
   }
 }
 
-export const githubService = GitHubService.getInstance(); 
+export const githubService = GitHubService.getInstance();

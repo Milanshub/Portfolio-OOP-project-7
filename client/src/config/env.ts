@@ -7,7 +7,7 @@ declare global {
       REACT_APP_API_TIMEOUT: string;
       REACT_APP_GITHUB_USERNAME: string;
       REACT_APP_GITHUB_CLIENT_ID?: string;
-      REACT_APP_STORAGE_PREFIX: string;
+      REACT_APP_STORAGE_KEY: string;
       REACT_APP_LOG_LEVEL: string;
       REACT_APP_ADMIN_EMAIL: string;
       NODE_ENV: string;
@@ -25,7 +25,7 @@ const envSchema = z.object({
   REACT_APP_GITHUB_CLIENT_ID: z.string().optional(),
 
   // Storage Configuration
-  REACT_APP_STORAGE_PREFIX: z.string().default('portfolio_'),
+  REACT_APP_STORAGE_KEY: z.string().default('your-default-key'),
 
   // Logging Configuration
   REACT_APP_LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
@@ -47,7 +47,7 @@ export const env = envSchema.parse({
   REACT_APP_GITHUB_CLIENT_ID: window.env.REACT_APP_GITHUB_CLIENT_ID,
 
   // Storage Configuration
-  REACT_APP_STORAGE_PREFIX: window.env.REACT_APP_STORAGE_PREFIX,
+  REACT_APP_STORAGE_KEY: window.env.REACT_APP_STORAGE_KEY,
 
   // Logging Configuration
   REACT_APP_LOG_LEVEL: window.env.REACT_APP_LOG_LEVEL as 'debug' | 'info' | 'warn' | 'error',
@@ -76,7 +76,7 @@ export const config = {
     clientId: env.REACT_APP_GITHUB_CLIENT_ID,
   },
   storage: {
-    prefix: env.REACT_APP_STORAGE_PREFIX,
+    key: env.REACT_APP_STORAGE_KEY,
   },
   logging: {
     level: env.REACT_APP_LOG_LEVEL,

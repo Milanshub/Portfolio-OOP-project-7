@@ -1,7 +1,12 @@
 import { api } from '@/lib/api/client';
-import { Analytics, AnalyticsEvent, CreateAnalytics, UpdateAnalytics } from '@/types/entities/analytics';
+import { 
+  Analytics, 
+  CreateAnalytics, 
+  UpdateAnalytics, 
+  AnalyticsReport, 
+  PageView 
+} from '@/types/entities/analytics';
 import { endpoints } from '@/lib/api/endpoints';
-import { ApiResponse } from '@/types/api';
 import { logger } from '@/config/logger';
 
 class AnalyticsService {
@@ -19,6 +24,7 @@ class AnalyticsService {
   async getAllAnalytics(): Promise<Analytics[]> {
     try {
       const response = await api.get<Analytics[]>(endpoints.ANALYTICS.GET_ALL);
+      logger.debug('Analytics retrieved successfully');
       return response.data;
     } catch (error) {
       logger.error('Failed to get all analytics:', error as Error);
@@ -29,6 +35,7 @@ class AnalyticsService {
   async getLatestAnalytics(): Promise<Analytics> {
     try {
       const response = await api.get<Analytics>(endpoints.ANALYTICS.GET_LATEST);
+      logger.debug('Latest analytics retrieved successfully');
       return response.data;
     } catch (error) {
       logger.error('Failed to get latest analytics:', error as Error);
@@ -36,9 +43,10 @@ class AnalyticsService {
     }
   }
 
-  async generateReport(): Promise<Analytics> {
+  async generateReport(): Promise<AnalyticsReport> {
     try {
-      const response = await api.get<Analytics>(endpoints.ANALYTICS.GET_REPORT);
+      const response = await api.get<AnalyticsReport>(endpoints.ANALYTICS.GET_REPORT);
+      logger.debug('Analytics report generated successfully');
       return response.data;
     } catch (error) {
       logger.error('Failed to generate analytics report:', error as Error);
@@ -46,9 +54,11 @@ class AnalyticsService {
     }
   }
 
+  // Public route - no auth required
   async recordPageView(page: string): Promise<void> {
     try {
-      await api.post(endpoints.ANALYTICS.PAGE_VIEW, { page });
+      const pageView: PageView = { page, timestamp: new Date() };
+      await api.post(endpoints.ANALYTICS.PAGE_VIEW, pageView);
       logger.info(`Page view recorded for: ${page}`);
     } catch (error) {
       logger.error('Failed to record page view:', error as Error);
@@ -59,6 +69,7 @@ class AnalyticsService {
   async getMostViewedProjects(): Promise<string[]> {
     try {
       const response = await api.get<string[]>(endpoints.ANALYTICS.MOST_VIEWED_PROJECTS);
+      logger.debug('Most viewed projects retrieved successfully');
       return response.data;
     } catch (error) {
       logger.error('Failed to get most viewed projects:', error as Error);
@@ -78,7 +89,7 @@ class AnalyticsService {
 
   async createAnalytics(data: CreateAnalytics): Promise<Analytics> {
     try {
-      const response = await api.post<Analytics>(endpoints.ANALYTICS.GET_ALL, data);
+      const response = await api.post<Analytics>(endpoints.ANALYTICS.CREATE, data);
       logger.info('Analytics created successfully');
       return response.data;
     } catch (error) {
@@ -89,7 +100,10 @@ class AnalyticsService {
 
   async updateAnalytics(id: string, data: UpdateAnalytics): Promise<Analytics> {
     try {
-      const response = await api.put<Analytics>(`${endpoints.ANALYTICS.GET_ALL}/${id}`, data);
+      const response = await api.put<Analytics>(
+        endpoints.ANALYTICS.UPDATE(id),
+        data
+      );
       logger.info(`Analytics updated successfully: ${id}`);
       return response.data;
     } catch (error) {
@@ -100,24 +114,10 @@ class AnalyticsService {
 
   async deleteAnalytics(id: string): Promise<void> {
     try {
-      await api.delete(`${endpoints.ANALYTICS.GET_ALL}/${id}`);
+      await api.delete(endpoints.ANALYTICS.DELETE(id));
       logger.info(`Analytics deleted successfully: ${id}`);
     } catch (error) {
       logger.error(`Failed to delete analytics ${id}:`, error as Error);
-      throw error;
-    }
-  }
-
-  async trackEvent(eventName: string, eventData: Record<string, any> = {}): Promise<void> {
-    try {
-      await api.post(`${endpoints.ANALYTICS.GET_ALL}/event`, {
-        event_name: eventName,
-        event_data: eventData,
-        timestamp: new Date(),
-      });
-      logger.info(`Event tracked: ${eventName}`, eventData);
-    } catch (error) {
-      logger.error(`Failed to track event ${eventName}:`, error as Error);
       throw error;
     }
   }

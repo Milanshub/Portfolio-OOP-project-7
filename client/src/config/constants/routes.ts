@@ -65,8 +65,11 @@ export const PUBLIC_ROUTES = {
     ANALYTICS_LATEST: '/api/analytics/latest',
     ANALYTICS_REPORT: '/api/analytics/report',
     ANALYTICS_PAGEVIEW: '/api/analytics/pageview',
+    ANALYTICS_CREATE: '/api/analytics',
+    ANALYTICS_UPDATE: (id: string) => `/api/analytics/${id}`,
+    ANALYTICS_DELETE: (id: string) => `/api/analytics/${id}`,
     MOST_VIEWED_PROJECTS: '/api/analytics/most-viewed-projects',
-  
+    
     // Admin
     ADMIN: '/api/admin',
     ADMIN_LOGIN: '/api/admin/login',

@@ -21,3 +21,23 @@ export interface UpdateAnalyticsEvent extends Partial<CreateAnalyticsEvent> {}
 
 export interface CreateAnalytics extends Omit<Analytics, 'id' | 'createdAt' | 'updatedAt'> {}
 export interface UpdateAnalytics extends Partial<CreateAnalytics> {}
+
+// Analytics Report type
+export interface AnalyticsReport {
+    totalPageViews: number;
+    uniqueVisitors: number;
+    avgTimeOnSite: number;
+    topProjects: string[];
+    lastUpdated: Date;
+}
+
+// Page View type
+export interface PageView {
+    page: string;
+    timestamp?: Date;
+}
+
+// Most Viewed Projects type
+export interface MostViewedProjects {
+    projectIds: string[];
+}
