@@ -52,6 +52,8 @@ export const PUBLIC_ROUTES = {
     PROFILE: '/api/profile',
     PROFILE_AVATAR: '/api/profile/avatar',
     PROFILE_RESUME: '/api/profile/resume',
+    PROFILE_UPDATE_AVATAR: '/api/profile/avatar/update',  
+    PROFILE_UPDATE_RESUME: '/api/profile/resume/update', 
   
     // Messages
     MESSAGES: '/api/messages',
@@ -69,7 +71,7 @@ export const PUBLIC_ROUTES = {
     ANALYTICS_UPDATE: (id: string) => `/api/analytics/${id}`,
     ANALYTICS_DELETE: (id: string) => `/api/analytics/${id}`,
     MOST_VIEWED_PROJECTS: '/api/analytics/most-viewed-projects',
-    
+
     // Admin
     ADMIN: '/api/admin',
     ADMIN_LOGIN: '/api/admin/login',

@@ -14,6 +14,8 @@ export interface AuthResponse {
         name: string;
         email: string;
         role: 'user' | 'admin';
+        createdAt: string;
+        updatedAt: string;
     };
     token: string;
     refreshToken: string;

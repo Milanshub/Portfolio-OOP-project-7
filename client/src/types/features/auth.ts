@@ -1,3 +1,5 @@
+import { ApiError } from '../api/errors';
+
 export interface User {
     id: string;
     name: string;
@@ -18,7 +20,8 @@ export interface AuthState {
     user: User | null;
     isAuthenticated: boolean;
     isLoading: boolean;
-    error: string | null;
+    error: ApiError | null;
+    status: AuthStatus;
 }
 
 export type AuthStatus = 'idle' | 'loading' | 'authenticated' | 'unauthenticated';

@@ -3,7 +3,7 @@ import { GitHubRepository, GitHubCommit } from '@/types';
 import { endpoints } from '@/lib/api/endpoints';
 import { logger } from '@/config/logger';
 
-class GitHubService {
+export class GitHubService {
   private static instance: GitHubService;
 
   private constructor() {}

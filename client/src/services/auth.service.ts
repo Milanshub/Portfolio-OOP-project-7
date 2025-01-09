@@ -3,7 +3,7 @@ import { AuthResponse, LoginRequest, User } from '@/types';
 import { endpoints } from '@/lib/api/endpoints';
 import { logger } from '@/config/logger';
 
-class AuthService {
+export class AuthService {
   private static instance: AuthService;
 
   private constructor() {}

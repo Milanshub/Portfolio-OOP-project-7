@@ -1,7 +1,9 @@
 import { api } from '@/lib/api/client';
 import { Project } from '@/types';
+import { endpoints } from '@/lib/api/endpoints';
+import { logger } from '@/config/logger';
 
-class ProjectService {
+export class ProjectService {
   private static instance: ProjectService;
 
   private constructor() {}
@@ -14,52 +16,101 @@ class ProjectService {
   }
 
   async getAllProjects(): Promise<Project[]> {
-    const response = await api.get<Project[]>('/projects');
-    return response;
+    try {
+      const response = await api.get<Project[]>(endpoints.PROJECTS.GET_ALL);
+      logger.debug('Projects retrieved successfully');
+      return response.data;
+    } catch (error) {
+      logger.error('Failed to get all projects:', error as Error);
+      throw error;
+    }
   }
 
   async getFeaturedProjects(): Promise<Project[]> {
-    const response = await api.get<Project[]>('/projects/featured');
-    return response;
+    try {
+      const response = await api.get<Project[]>(endpoints.PROJECTS.GET_FEATURED);
+      logger.debug('Featured projects retrieved successfully');
+      return response.data;
+    } catch (error) {
+      logger.error('Failed to get featured projects:', error as Error);
+      throw error;
+    }
   }
 
   async getProjectById(id: string): Promise<Project> {
-    const response = await api.get<Project>(`/projects/${id}`);
-    return response;
+    try {
+      const response = await api.get<Project>(endpoints.PROJECTS.GET_BY_ID(id));
+      logger.debug(`Project retrieved successfully: ${id}`);
+      return response.data;
+    } catch (error) {
+      logger.error(`Failed to get project ${id}:`, error as Error);
+      throw error;
+    }
   }
 
   async createProject(data: FormData): Promise<Project> {
-    const response = await api.post<Project>('/projects', data);
-    return response;
+    try {
+      const response = await api.post<Project>(endpoints.PROJECTS.CREATE, data);
+      logger.info('Project created successfully');
+      return response.data;
+    } catch (error) {
+      logger.error('Failed to create project:', error as Error);
+      throw error;
+    }
   }
 
   async updateProject(id: string, data: FormData): Promise<Project> {
-    const response = await api.put<Project>(`/projects/${id}`, data);
-    return response;
+    try {
+      const response = await api.put<Project>(endpoints.PROJECTS.UPDATE(id), data);
+      logger.info(`Project updated successfully: ${id}`);
+      return response.data;
+    } catch (error) {
+      logger.error(`Failed to update project ${id}:`, error as Error);
+      throw error;
+    }
   }
 
   async deleteProject(id: string): Promise<void> {
-    await api.delete(`/projects/${id}`);
+    try {
+      await api.delete(endpoints.PROJECTS.DELETE(id));
+      logger.info(`Project deleted successfully: ${id}`);
+    } catch (error) {
+      logger.error(`Failed to delete project ${id}:`, error as Error);
+      throw error;
+    }
   }
 
   async updateThumbnail(id: string, file: File): Promise<Project> {
-    const formData = new FormData();
-    formData.append('thumbnail', file);
-    const response = await api.put<Project>(`/projects/${id}/thumbnail`, formData);
-    return response;
+    try {
+      const formData = new FormData();
+      formData.append('thumbnail', file);
+      const response = await api.put<Project>(
+        endpoints.PROJECTS.GET_THUMBNAIL(id),
+        formData
+      );
+      logger.info(`Project thumbnail updated successfully: ${id}`);
+      return response.data;
+    } catch (error) {
+      logger.error(`Failed to update project thumbnail ${id}:`, error as Error);
+      throw error;
+    }
   }
 
   async updateImages(id: string, files: File[]): Promise<Project> {
-    const formData = new FormData();
-    files.forEach(file => formData.append('images', file));
-    const response = await api.put<Project>(`/projects/${id}/images`, formData);
-    return response;
-  }
-
-  async syncWithGitHub(id: string, repoUrl: string): Promise<Project> {
-    const response = await api.post<Project>(`/projects/${id}/github`, { repoUrl });
-    return response;
+    try {
+      const formData = new FormData();
+      files.forEach(file => formData.append('images', file));
+      const response = await api.put<Project>(
+        endpoints.PROJECTS.GET_IMAGES(id),
+        formData
+      );
+      logger.info(`Project images updated successfully: ${id}`);
+      return response.data;
+    } catch (error) {
+      logger.error(`Failed to update project images ${id}:`, error as Error);
+      throw error;
+    }
   }
 }
 
-export const projectService = ProjectService.getInstance(); 
+export const projectService = ProjectService.getInstance();

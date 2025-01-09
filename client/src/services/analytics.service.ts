@@ -9,7 +9,7 @@ import {
 import { endpoints } from '@/lib/api/endpoints';
 import { logger } from '@/config/logger';
 
-class AnalyticsService {
+export class AnalyticsService {
   private static instance: AnalyticsService;
 
   private constructor() {}
