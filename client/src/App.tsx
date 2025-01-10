@@ -1,13 +1,17 @@
-import { AuthProvider } from '@/context/AuthContext';
-import { ThemeProvider } from '@/context/ThemeContext';
-import { Router } from '@/components/Router';
+import { AuthProvider } from './contexts';
+import { BrowserRouter as Router } from 'react-router-dom';
+// import { ThemeProvider } from '@/contexts/ThemeContext';
+import { ErrorBoundary } from './components';
+import { AppRoutes } from './routes';
 
 export const App = () => {
   return (
-    <AuthProvider>
-      <ThemeProvider>
-        <Router />
-      </ThemeProvider>
-    </AuthProvider>
+    <ErrorBoundary>
+      <Router>
+        <AuthProvider>
+          <AppRoutes />
+        </AuthProvider>
+      </Router>
+    </ErrorBoundary>
   );
 };
