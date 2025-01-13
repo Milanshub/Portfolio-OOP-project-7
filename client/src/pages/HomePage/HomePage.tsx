@@ -2,13 +2,15 @@ import React from 'react';
 
 export const HomePage = () => {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <h1 className="text-4xl font-bold text-gray-800 mb-4">
-        Welcome to My Portfolio
-      </h1>
-      <p className="text-gray-600">
-        React is working! 🚀
-      </p>
+    <div className="flex min-h-screen items-center justify-center">
+      <div className="m-8 space-y-4 bg-gray-100 p-8 rounded-lg shadow-lg">
+        <h1 className="text-4xl font-bold text-red-600">
+          Welcome to My Portfolio
+        </h1>
+        <p className="text-lg text-red-600">
+          React is working yes! 🚀
+        </p>
+      </div>
     </div>
   );
 };
