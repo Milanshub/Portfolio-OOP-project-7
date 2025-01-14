@@ -1,7 +1,8 @@
-/* This tells Tailwind to include its basic styling reset (like removing default margins) */
+/* This tells Tailwind to include its basic styling reset (like removing default margins)
+like for examples html, body, h1, h2, h3, h4, h5, h6, p, ul, ol, li, etc... */
 @tailwind base;    
 
-/* This lets you use pre-built components if you make them */
+/* This lets you use pre-built components if you make them, like for example a button, a card, a modal, etc... */
 @tailwind components;    
 
 /* This is the main one! It gives you all the utility classes like:
@@ -12,3 +13,38 @@
    etc... */
 @tailwind utilities;
 /* Your custom base styles */
+
+/* d */
+
+@layer base {
+   h1 {
+     @apply text-2xl;
+   }
+   h2 {
+     @apply text-xl;
+   }
+   body {
+      background-color: white;
+    }
+  
+    @media (min-width: 768px) {
+      body {
+        background-color: rgb(202, 238, 250); /* Changes bg for medium screens */
+      }
+    }
+ }
+ 
+ @layer components {
+   .btn-blue {
+     @apply bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded;
+   }
+ }
+ 
+ @layer utilities {
+   .filter-none {
+     filter: none;
+   }
+   .filter-grayscale {
+     filter: grayscale(100%);
+   }
+ }
